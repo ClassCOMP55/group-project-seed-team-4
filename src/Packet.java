@@ -17,4 +17,8 @@ public class Packet {
 	public int getId() {
 		return id;
 	}
+	
+	public PacketType getType() {
+		return type;
+	}
 }
