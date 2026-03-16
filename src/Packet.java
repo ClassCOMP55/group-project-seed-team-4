@@ -29,4 +29,8 @@ public class Packet {
 	public double getThreatScore() {
 		return threatScore;
 	}
+	
+	public PacketInfo toInfo() {
+		return new PacketInfo(type.toString(), sourceIp, String.valueOf(port), "Threat Score; " + threatScore);
+	}
 }
