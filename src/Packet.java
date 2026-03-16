@@ -21,4 +21,8 @@ public class Packet {
 	public PacketType getType() {
 		return type;
 	}
+	
+	public int getPort() {
+		return port;
+	}
 }
