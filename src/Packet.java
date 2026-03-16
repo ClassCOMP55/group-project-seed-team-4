@@ -25,4 +25,8 @@ public class Packet {
 	public int getPort() {
 		return port;
 	}
+	
+	public double getThreatScore() {
+		return threatScore;
+	}
 }
