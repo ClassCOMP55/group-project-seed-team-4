@@ -13,4 +13,8 @@ public class Packet {
 		this.port = port;
 		this.threatScore = threatScore;
 	}
+	
+	public int getId() {
+		return id;
+	}
 }
