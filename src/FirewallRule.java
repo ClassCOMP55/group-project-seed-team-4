@@ -11,4 +11,20 @@ public class FirewallRule {
 		this.threatThreshold = threatThreshold;
 		this.decision = decision;
 	}
+	
+	public boolean matches(Packet p) {
+		if (packetType != null && p.getType() != packetType) {
+			return false;
+		}
+		
+		if (p.getPort() != portRange) {
+			return false;
+		}
+		
+		if (p.getThreatScore() < threatThreshold) {
+			return false;
+		}
+		
+		return true;
+	}
 }
