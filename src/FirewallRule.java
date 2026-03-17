@@ -27,4 +27,8 @@ public class FirewallRule {
 		
 		return true;
 	}
+	
+	public Decision getDecision() {
+		return decision;
+	}
 }
