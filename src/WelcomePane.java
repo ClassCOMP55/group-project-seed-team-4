@@ -2,7 +2,7 @@ import java.awt.event.MouseEvent;
 
 import acm.graphics.GImage;
 import acm.graphics.GObject;
-
+import acm.graphics.*;
 public class WelcomePane extends GraphicsPane{
 	public WelcomePane(MainApplication mainScreen) {
 		this.mainScreen = mainScreen;
@@ -20,6 +20,20 @@ public class WelcomePane extends GraphicsPane{
 			mainScreen.remove(item);
 		}
 		contents.clear();
+	}
+	
+	private void addButtons() {
+		GLabel play = new GLabel("PLAY", 100, 200);
+		GLabel settings = new GLabel("SETTINGS", 100, 250);
+		GLabel shop = new GLabel("SHOP", 100, 300);
+		
+		contents.add(play);
+		contents.add(settings);
+		contents.add(shop);
+		
+		mainScreen.add(play);
+		mainScreen.add(settings);
+		mainScreen.add(shop);
 	}
 	
 	private void addPicture(){
