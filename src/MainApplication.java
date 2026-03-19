@@ -77,6 +77,10 @@ public class MainApplication extends GraphicsProgram{
 		switchToScreen(difficultyPane);
 	}
 	
+	public void switchToGameScreen() {
+		switchToScreen(gamePane);
+	}
+	
 	protected void switchToScreen(GraphicsPane newScreen) {
 		if(currentScreen != null) {
 			currentScreen.hideContent();
