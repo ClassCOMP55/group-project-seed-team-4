@@ -73,7 +73,9 @@ public class MainApplication extends GraphicsProgram{
 		switchToScreen(shopPane);
 	}
 	
-	
+	public void switchToDifficultyScreen() {
+		switchToScreen(difficultyPane);
+	}
 	
 	protected void switchToScreen(GraphicsPane newScreen) {
 		if(currentScreen != null) {
