@@ -42,6 +42,9 @@ public class MainApplication extends GraphicsProgram{
 		//Initialize all Panes
 		welcomePane = new WelcomePane(this);
 		descriptionPane = new DescriptionPane(this);
+		settingsPane = new SettingsPane(this);
+		shopPane = new ShopPane(this);
+		
 
 		//TheDefaultPane
 		switchToScreen(welcomePane);
