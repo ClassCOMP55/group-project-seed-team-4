@@ -35,7 +35,10 @@ public class DifficultyPane extends GraphicsPane{
 		GObject clicked = mainScreen.getElementAtLocation(e.getX(), e.getY());
 		
 		if(clicked == contents.get(0) || clicked == contents.get(1) || clicked == contents.get(2)) {
-			//mainScreen.switchToGameScreen();
+			mainScreen.switchToGameScreen();
+		}
+		else if(clicked == contents.get(3)) {
+			mainScreen.switchToWelcomeScreen();
 		}
 	}
 }
