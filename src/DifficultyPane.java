@@ -23,4 +23,11 @@ public class DifficultyPane extends GraphicsPane{
 		mainScreen.add(hard);;
 		mainScreen.add(back);
 	}
+	
+	public void hideContent() {
+		for(GObject obj : contents) {
+			mainScreen.remove(obj);
+		}
+		contents.clear();
+	}
 }
