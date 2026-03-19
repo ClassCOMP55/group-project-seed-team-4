@@ -69,6 +69,12 @@ public class MainApplication extends GraphicsProgram{
 		switchToScreen(settingsPane);
 	}
 	
+	public void switchToShopScreen() {
+		switchToScreen(shopPane);
+	}
+	
+	
+	
 	protected void switchToScreen(GraphicsPane newScreen) {
 		if(currentScreen != null) {
 			currentScreen.hideContent();
