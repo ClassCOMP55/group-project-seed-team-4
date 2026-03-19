@@ -14,6 +14,11 @@ public class MainApplication extends GraphicsProgram{
 	private WelcomePane welcomePane;
 	private DescriptionPane descriptionPane;
 	private GraphicsPane currentScreen;
+	private SettingsPane settingsPane;
+	private ShopPane shopPane;
+	private DifficultyPane difficultyPane;
+	private GamePane gamePame;
+	private GameOverPane gameOverPane;
 
 
 	public MainApplication() {
