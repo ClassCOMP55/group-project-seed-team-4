@@ -22,6 +22,7 @@ public class DifficultyPane extends GraphicsPane{
 		mainScreen.add(medium);
 		mainScreen.add(hard);;
 		mainScreen.add(back);
+		
 	}
 	
 	public void hideContent() {

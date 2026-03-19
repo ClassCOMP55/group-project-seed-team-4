@@ -12,6 +12,7 @@ public class WelcomePane extends GraphicsPane{
 	public void showContent() {
 		addPicture();
 		addDescriptionButton();
+		addButtons();
 	}
 
 	@Override
@@ -22,18 +23,22 @@ public class WelcomePane extends GraphicsPane{
 		contents.clear();
 	}
 	
+	private GLabel playButton;
+	private GLabel settingsButton;
+	private GLabel shopButton;
+	
 	private void addButtons() {
-		GLabel play = new GLabel("PLAY", 100, 200);
-		GLabel settings = new GLabel("SETTINGS", 100, 250);
-		GLabel shop = new GLabel("SHOP", 100, 300);
+		playButton = new GLabel("PLAY", 100, 200);
+		settingsButton = new GLabel("SETTINGS", 100, 250);
+		shopButton = new GLabel("SHOP", 100, 300);
 		
-		contents.add(play);
-		contents.add(settings);
-		contents.add(shop);
+		contents.add(playButton);
+		contents.add(settingsButton);
+		contents.add(shopButton);
 		
-		mainScreen.add(play);
-		mainScreen.add(settings);
-		mainScreen.add(shop);
+		mainScreen.add(playButton);
+		mainScreen.add(settingsButton);
+		mainScreen.add(shopButton);
 	}
 	
 	private void addPicture(){
@@ -57,8 +62,16 @@ public class WelcomePane extends GraphicsPane{
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (mainScreen.getElementAtLocation(e.getX(), e.getY()) == contents.get(1)) {
-			mainScreen.switchToDescriptionScreen();
+		GObject clicked = mainScreen.getElementAtLocation(e.getX(), e.getY());
+		
+		if(clicked == playButton) {
+			mainScreen.switchToDifficultyScreen();
+		}
+		else if(clicked == settingsButton) {
+			mainScreen.switchToSettingsScreen();
+		}
+		else if(clicked == shopButton) {
+			mainScreen.switchToShopScreen();
 		}
 	}
 
