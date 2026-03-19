@@ -65,6 +65,9 @@ public class MainApplication extends GraphicsProgram{
 		switchToScreen(welcomePane);
 	}
 	
+	public void switchToSettingsScreen() {
+		switchToScreen(settingsPane);
+	}
 	
 	protected void switchToScreen(GraphicsPane newScreen) {
 		if(currentScreen != null) {
