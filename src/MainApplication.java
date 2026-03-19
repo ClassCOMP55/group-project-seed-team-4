@@ -45,6 +45,8 @@ public class MainApplication extends GraphicsProgram{
 		settingsPane = new SettingsPane(this);
 		shopPane = new ShopPane(this);
 		difficultyPane = new DifficultyPane(this);
+		gamePane = new GamePane(this);
+		gameOverPane = new GameOverPane(this);
 
 		//TheDefaultPane
 		switchToScreen(welcomePane);
