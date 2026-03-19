@@ -30,4 +30,12 @@ public class DifficultyPane extends GraphicsPane{
 		}
 		contents.clear();
 	}
+	
+	public void mouseClicked(MouseEvent e) {
+		GObject clicked = mainScreen.getElementAtLocation(e.getX(), e.getY());
+		
+		if(clicked == contents.get(0) || clicked == contents.get(1) || clicked == contents.get(2)) {
+			//mainScreen.switchToGameScreen();
+		}
+	}
 }
