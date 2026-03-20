@@ -2,7 +2,7 @@ import java.awt.event.MouseEvent;
 import acm.graphics.*;
 public class ShopPane extends GraphicsPane {
 
-	public ShopPane(MainApplication mainApplication) {
+	public ShopPane(MainApplication mainScreen) {
 		this.mainScreen = mainScreen;
 	}
 	
@@ -22,5 +22,11 @@ public class ShopPane extends GraphicsPane {
 			mainScreen.remove(obj);
 		}
 		contents.clear();
+	}
+	
+	public void mouseClicked(MouseEvent e) {
+		if(mainScreen.getElementAtLocation(e.getX(), e.getY()) == contents.get(1)) {
+			mainScreen.switchToWelcomeScreen();
+		}
 	}
 }
