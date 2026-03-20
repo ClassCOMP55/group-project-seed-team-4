@@ -16,5 +16,11 @@ public class ShopPane extends GraphicsPane {
 		mainScreen.add(title);
 		mainScreen.add(back);
 	}
-
+	
+	public void hideContent() {
+		for(GObject obj : contents){
+			mainScreen.remove(obj);
+		}
+		contents.clear();
+	}
 }
