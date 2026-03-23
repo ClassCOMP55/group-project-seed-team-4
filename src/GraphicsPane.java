@@ -116,7 +116,10 @@ public class GraphicsPane {
 	public void mouseDragged(MouseEvent e) {
 		// Not needed for this version
 	}
-
+	
+	public void mouseMoved(MouseEvent e) {
+		
+	}
 	public void keyPressed(KeyEvent e) {
 		int key = e.getKeyCode();
 
