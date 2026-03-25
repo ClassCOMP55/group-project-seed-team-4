@@ -5,6 +5,7 @@ import acm.graphics.*;
 
 public class DescriptionPane extends GraphicsPane{
 	public DescriptionPane(MainApplication mainScreen) {
+		super(mainScreen);
 		this.mainScreen = mainScreen;
 	}
 	

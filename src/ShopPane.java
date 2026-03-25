@@ -44,8 +44,7 @@ public class ShopPane extends GraphicsPane {
 	private Rectangle backRegion;
 
 	public ShopPane(MainApplication mainScreen) {
-		super();
-		this.mainScreen = mainScreen;
+		super(mainScreen);
 		fTitle     = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD,  52f);
 		fSub       = MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 20f);
 		fItemName  = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD,  28f);
@@ -73,14 +72,14 @@ public class ShopPane extends GraphicsPane {
 		backRegion = null;
 	}
 
-	private void add(GObject o) { contents.add(o); mainScreen.add(o); }
+	private void addContent(GObject o) { contents.add(o); mainScreen.add(o); }
 
 	private void drawBackground() {
 		int rw = (int) mainScreen.getWidth();
 		int rh = (int) mainScreen.getHeight();
 		GRect bg = new GRect(0, 0, rw, rh);
 		bg.setFilled(true); bg.setFillColor(BG); bg.setColor(BG);
-		add(bg);
+		addContent(bg);
 	}
 
 	private void drawGrid() {
@@ -108,7 +107,7 @@ public class ShopPane extends GraphicsPane {
 		GLabel title = new GLabel("SHOP", 0, titleY);
 		title.setFont(fTitle); title.setColor(NEON_CYAN);
 		title.setLocation((W - title.getWidth()) / 2.0, titleY);
-		add(title);
+		addContent(title);
 
 		GLine ul = new GLine((W - title.getWidth()) / 2.0, titleY + 8,
 		                     (W + title.getWidth()) / 2.0, titleY + 8);
@@ -117,7 +116,7 @@ public class ShopPane extends GraphicsPane {
 		GLabel sub = new GLabel(">  SPEND YOUR POINTS  //  UPGRADES  &  POWER-UPS", 0, titleY + 40);
 		sub.setFont(fSub); sub.setColor(new Color(0, 160, 190));
 		sub.setLocation((W - sub.getWidth()) / 2.0, titleY + 40);
-		add(sub);
+		addContent(sub);
 	}
 
 	private void drawShopItems() {
@@ -139,35 +138,35 @@ public class ShopPane extends GraphicsPane {
 		card.setFilled(true);
 		card.setFillColor(PANEL_BG);
 		card.setColor(col);
-		add(card);
+		addContent(card);
 
 		// Left accent bar
 		GRect bar = new GRect(x, y, 5, h);
 		bar.setFilled(true); bar.setFillColor(col); bar.setColor(col);
-		add(bar);
+		addContent(bar);
 
 		// Item name
 		GLabel nameLbl = new GLabel(name, x+24, y+40);
 		nameLbl.setFont(fItemName); nameLbl.setColor(col);
-		add(nameLbl);
+		addContent(nameLbl);
 
 		// Description
 		GLabel descLbl = new GLabel(desc, x+26, y+78);
 		descLbl.setFont(fItemDesc); descLbl.setColor(new Color(160, 200, 215));
-		add(descLbl);
+		addContent(descLbl);
 
 		// Price tag (right side)
 		GLabel priceLbl = new GLabel(price, 0, y+46);
 		priceLbl.setFont(fItemPrice); priceLbl.setColor(NEON_YELLOW);
 		priceLbl.setLocation(x + w - priceLbl.getWidth() - 24, y+46);
-		add(priceLbl);
+		addContent(priceLbl);
 
 		// Price box outline
 		GRect priceBox = new GRect(
 			x + w - priceLbl.getWidth() - 36, y + 26,
 			priceLbl.getWidth() + 24, 34);
 		priceBox.setFilled(false); priceBox.setColor(new Color(100, 80, 0));
-		add(priceBox);
+		addContent(priceBox);
 	}
 
 	private void drawBackButton() {
@@ -177,12 +176,12 @@ public class ShopPane extends GraphicsPane {
 
 		GRect btn = new GRect(bx, by, bw, bh);
 		btn.setFilled(true); btn.setFillColor(new Color(0,20,35)); btn.setColor(DIM_CYAN);
-		add(btn);
+		addContent(btn);
 
 		GLabel lbl = new GLabel("< BACK TO MENU", 0, 0);
 		lbl.setFont(fBack); lbl.setColor(new Color(0, 170, 200));
 		lbl.setLocation(bx + (bw - lbl.getWidth()) / 2.0, by + (bh / 2.0) + 8);
-		add(lbl);
+		addContent(lbl);
 
 		backRegion = new Rectangle(bx, by, bw, bh);
 	}
@@ -196,7 +195,7 @@ public class ShopPane extends GraphicsPane {
 			0, H-22);
 		ticker.setFont(fTicker); ticker.setColor(new Color(0, 150, 180));
 		ticker.setLocation((W - ticker.getWidth()) / 2.0, H-22);
-		add(ticker);
+		addContent(ticker);
 	}
 
 	@Override

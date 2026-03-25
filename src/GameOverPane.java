@@ -42,8 +42,7 @@ public class GameOverPane extends GraphicsPane {
 	private Rectangle menuRegion;
  
 	public GameOverPane(MainApplication mainScreen) {
-		super();
-		this.mainScreen = mainScreen;
+		super(mainScreen);
 		fTitle  = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD,  52f);
 		fSub    = MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 22f);
 		fChip   = MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 16f);
@@ -80,20 +79,20 @@ public class GameOverPane extends GraphicsPane {
 		menuRegion  = null;
 	}
  
-	private void add(GObject o) { contents.add(o); mainScreen.add(o); }
+	private void addContent(GObject o) { contents.add(o); mainScreen.add(o); }
  
 	private void drawBackground() {
 		int rw = (int) mainScreen.getWidth();
 		int rh = (int) mainScreen.getHeight();
 		GRect bg = new GRect(0, 0, rw, rh);
 		bg.setFilled(true); bg.setFillColor(BG); bg.setColor(BG);
-		add(bg);
+		addContent(bg);
 	}
  
 	private void drawGrid() {
 		int s = 60;
-		for (int x = 0; x <= W; x += s) { GLine l = new GLine(x,0,x,H); l.setColor(GRID_COLOR); add(l); }
-		for (int y = 0; y <= H; y += s) { GLine l = new GLine(0,y,W,y); l.setColor(GRID_COLOR); add(l); }
+		for (int x = 0; x <= W; x += s) { GLine l = new GLine(x,0,x,H); l.setColor(GRID_COLOR); addContent(l); }
+		for (int y = 0; y <= H; y += s) { GLine l = new GLine(0,y,W,y); l.setColor(GRID_COLOR); addContent(l); }
 	}
  
 	private void drawCornerBrackets() {
@@ -105,17 +104,17 @@ public class GameOverPane extends GraphicsPane {
 				new GLine(cx,cy,cx+cs,cy), new GLine(cx,cy+cs,cx+cs,cy+cs),
 				new GLine(cx,cy,cx,cy+cs), new GLine(cx+cs,cy,cx+cs,cy+cs)
 			};
-			for (GLine l : arms) { l.setColor(NEON_CYAN); add(l); }
+			for (GLine l : arms) { l.setColor(NEON_CYAN); addContent(l); }
 		}
 	}
  
 	private void drawAlertPanel() {
 		GRect panel = new GRect(PX, PY, PW, PH);
 		panel.setFilled(true); panel.setFillColor(PANEL_BG); panel.setColor(NEON_RED);
-		add(panel);
+		addContent(panel);
  
 		GLine accent = new GLine(PX+30, PY+60, PX+PW-30, PY+60);
-		accent.setColor(DIM_CYAN); add(accent);
+		accent.setColor(DIM_CYAN); addContent(accent);
  
 		addChip(PX+32,       PY+42, "●  SYSTEM ALERT",  NEON_RED);
 		addChip(PX+PW-280,   PY+42, "ERR CODE: 0xDEAD", NEON_YELLOW);
@@ -124,7 +123,7 @@ public class GameOverPane extends GraphicsPane {
 	private void addChip(int x, int y, String text, Color col) {
 		GLabel lbl = new GLabel(text, x, y);
 		lbl.setFont(fChip); lbl.setColor(col);
-		add(lbl);
+		addContent(lbl);
 	}
  
 	private void drawTitle() {
@@ -133,17 +132,17 @@ public class GameOverPane extends GraphicsPane {
 		GLabel cause = new GLabel(causeOfDeath.toUpperCase(), 0, titleY);
 		cause.setFont(fTitle); cause.setColor(NEON_RED);
 		cause.setLocation((W - cause.getWidth()) / 2.0, titleY);
-		add(cause);
+		addContent(cause);
  
 		GLine ul = new GLine(
 			(W - cause.getWidth()) / 2.0, titleY + 8,
 			(W + cause.getWidth()) / 2.0, titleY + 8);
-		ul.setColor(NEON_RED); add(ul);
+		ul.setColor(NEON_RED); addContent(ul);
  
 		GLabel sub = new GLabel("CONNECTION  TERMINATED", 0, titleY + 48);
 		sub.setFont(fSub); sub.setColor(NEON_CYAN);
 		sub.setLocation((W - sub.getWidth()) / 2.0, titleY + 48);
-		add(sub);
+		addContent(sub);
 	}
  
 	private void drawStatsPanel() {
@@ -153,15 +152,15 @@ public class GameOverPane extends GraphicsPane {
  
 		GRect box = new GRect(bx, by, bw, bh);
 		box.setFilled(true); box.setFillColor(new Color(0,14,28)); box.setColor(DIM_CYAN);
-		add(box);
+		addContent(box);
  
 		GLabel hdr = new GLabel("---  SESSION  REPORT  ---", 0, by+36);
 		hdr.setFont(fHdr); hdr.setColor(NEON_CYAN);
 		hdr.setLocation((W - hdr.getWidth()) / 2.0, by+36);
-		add(hdr);
+		addContent(hdr);
  
 		GLine hdiv = new GLine(bx+20, by+46, bx+bw-20, by+46);
-		hdiv.setColor(DIM_CYAN); add(hdiv);
+		hdiv.setColor(DIM_CYAN); addContent(hdiv);
  
 		addStatRow(bx+28, by+86,  "FINAL  SCORE",     String.format("%06d", finalScore), NEON_CYAN);
 		String livesStr = finalLives <= 0 ? "0   [ CRITICAL ]" : String.valueOf(finalLives);
@@ -173,11 +172,11 @@ public class GameOverPane extends GraphicsPane {
 	private void addStatRow(int x, int y, String label, String value, Color valCol) {
 		GLabel lbl = new GLabel(label + ":", x, y);
 		lbl.setFont(fStatL); lbl.setColor(new Color(100, 170, 200));
-		add(lbl);
+		addContent(lbl);
  
 		GLabel val = new GLabel(value, x+340, y);
 		val.setFont(fStatV); val.setColor(valCol);
-		add(val);
+		addContent(val);
 	}
  
 	private void drawButtons() {
@@ -194,26 +193,26 @@ public class GameOverPane extends GraphicsPane {
 		btn.setFilled(true);
 		btn.setFillColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 35));
 		btn.setColor(col);
-		add(btn);
+		addContent(btn);
  
 		GLabel lbl = new GLabel(label, 0, 0);
 		lbl.setFont(fBtn); lbl.setColor(col);
 		lbl.setLocation(x + (w - lbl.getWidth()) / 2.0, y + (h / 2.0) + 9);
-		add(lbl);
+		addContent(lbl);
  
 		return new Rectangle(x, y, w, h);
 	}
  
 	private void drawTickerBar() {
 		GLine div = new GLine(60, H-50, W-60, H-50);
-		div.setColor(DIM_CYAN); add(div);
+		div.setColor(DIM_CYAN); addContent(div);
  
 		GLabel ticker = new GLabel(
 			">>  FIREWALL FRENZY  |  SYSTEM OFFLINE  |  THREAT LEVEL: CRITICAL  |  AWAITING REBOOT",
 			0, H-22);
 		ticker.setFont(fTicker); ticker.setColor(new Color(0, 160, 190));
 		ticker.setLocation((W - ticker.getWidth()) / 2.0, H-22);
-		add(ticker);
+		addContent(ticker);
 	}
  
 	@Override

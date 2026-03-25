@@ -28,7 +28,7 @@ public class WelcomePane extends GraphicsPane {
 	private Rectangle shopRegion;
 
 	public WelcomePane(MainApplication mainScreen) {
-		super();
+		super(mainScreen);
 		this.mainScreen = mainScreen;
 		// Derive sized fonts from the loaded base fonts
 		fLogoHacked = MainApplication.FONT_HACKED.deriveFont(Font.BOLD,  90f);
@@ -55,14 +55,14 @@ public class WelcomePane extends GraphicsPane {
 		contents.clear();
 	}
 
-	private void add(GObject o) { contents.add(o); mainScreen.add(o); }
+	private void addContent(GObject o) { contents.add(o); mainScreen.add(o); }
 
 	private void drawBackground() {
 		int rw = (int) mainScreen.getWidth();
 		int rh = (int) mainScreen.getHeight();
 		GRect bg = new GRect(0, 0, rw, rh);
 		bg.setFilled(true); bg.setFillColor(BG); bg.setColor(BG);
-		add(bg);
+		addContent(bg);
 	}
 
 	private void drawGrid() {
@@ -90,7 +90,7 @@ public class WelcomePane extends GraphicsPane {
 		GLabel title = new GLabel("FIREWALL FRENZY", 0, titleY);
 		title.setFont(fLogoHacked); title.setColor(NEON_CYAN);
 		title.setLocation((W - title.getWidth()) / 2.0, titleY);
-		add(title);
+		addContent(title);
 
 		GLine ul = new GLine((W - title.getWidth()) / 2.0, titleY + 10,
 		                     (W + title.getWidth()) / 2.0, titleY + 10);
@@ -99,7 +99,7 @@ public class WelcomePane extends GraphicsPane {
 		GLabel sub = new GLabel("PACKET  DEFENSE  SIMULATOR  //  v2.0", 0, titleY + 40);
 		sub.setFont(fSub); sub.setColor(new Color(0, 160, 190));
 		sub.setLocation((W - sub.getWidth()) / 2.0, titleY + 40);
-		add(sub);
+		addContent(sub);
 	}
 
 	private void drawBootLines() {
@@ -118,7 +118,7 @@ public class WelcomePane extends GraphicsPane {
 			GLabel lbl = new GLabel(lines[i], 0, bootY + i * 30);
 			lbl.setFont(fBoot); lbl.setColor(colors[i]);
 			lbl.setLocation((W - lbl.getWidth()) / 2.0, bootY + i * 30);
-			add(lbl);
+			addContent(lbl);
 		}
 	}
 
@@ -142,7 +142,7 @@ public class WelcomePane extends GraphicsPane {
 		btn.setFilled(true);
 		btn.setFillColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 30));
 		btn.setColor(col);
-		add(btn);
+		addContent(btn);
 
 		GLine bar = new GLine(x+6, y+10, x+6, y+h-10);
 		bar.setColor(col); add(bar);
@@ -150,7 +150,7 @@ public class WelcomePane extends GraphicsPane {
 		GLabel lbl = new GLabel(label, 0, 0);
 		lbl.setFont(fBtn); lbl.setColor(col);
 		lbl.setLocation(x + (w - lbl.getWidth()) / 2.0, y + (h / 2.0) + 9);
-		add(lbl);
+		addContent(lbl);
 
 		return new Rectangle(x, y, w, h);
 	}
@@ -164,7 +164,7 @@ public class WelcomePane extends GraphicsPane {
 			0, H-22);
 		ticker.setFont(fTicker); ticker.setColor(new Color(0, 150, 180));
 		ticker.setLocation((W - ticker.getWidth()) / 2.0, H-22);
-		add(ticker);
+		addContent(ticker);
 	}
 
 	@Override

@@ -19,7 +19,7 @@ public class GamePane extends GraphicsPane {
     private int score;
 
     public GamePane(MainApplication mainScreen) {
-        this.mainScreen = mainScreen;
+        super(mainScreen);
         fScore = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 28f);
         score = 0;
     }
@@ -102,7 +102,7 @@ public class GamePane extends GraphicsPane {
     @Override
     public void keyTyped(KeyEvent e) { }
 
-    private void add(GObject o) {
+    private void addContent(GObject o) {
         contents.add(o);
         mainScreen.add(o);
     }

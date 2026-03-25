@@ -39,8 +39,7 @@ public class DifficultyPane extends GraphicsPane {
 	private Rectangle   backRegion;
  
 	public DifficultyPane(MainApplication mainScreen) {
-		super();
-		this.mainScreen = mainScreen;
+		super(mainScreen);
 		fTitle  = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD,  52f);
 		fSub    = MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 20f);
 		fName   = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD,  32f);
@@ -67,20 +66,20 @@ public class DifficultyPane extends GraphicsPane {
 		contents.clear();
 	}
  
-	private void add(GObject o) { contents.add(o); mainScreen.add(o); }
+	private void addContent(GObject o) { contents.add(o); mainScreen.add(o); }
  
 	private void drawBackground() {
 		int rw = (int) mainScreen.getWidth();
 		int rh = (int) mainScreen.getHeight();
 		GRect bg = new GRect(0, 0, rw, rh);
 		bg.setFilled(true); bg.setFillColor(BG); bg.setColor(BG);
-		add(bg);
+		addContent(bg);
 	}
  
 	private void drawGrid() {
 		int s = 60;
-		for (int x = 0; x <= W; x += s) { GLine l = new GLine(x,0,x,H); l.setColor(GRID_COLOR); add(l); }
-		for (int y = 0; y <= H; y += s) { GLine l = new GLine(0,y,W,y); l.setColor(GRID_COLOR); add(l); }
+		for (int x = 0; x <= W; x += s) { GLine l = new GLine(x,0,x,H); l.setColor(GRID_COLOR); addContent(l); }
+		for (int y = 0; y <= H; y += s) { GLine l = new GLine(0,y,W,y); l.setColor(GRID_COLOR); addContent(l); }
 	}
  
 	private void drawCornerBrackets() {
@@ -92,7 +91,7 @@ public class DifficultyPane extends GraphicsPane {
 				new GLine(cx,cy,cx+cs,cy), new GLine(cx,cy+cs,cx+cs,cy+cs),
 				new GLine(cx,cy,cx,cy+cs), new GLine(cx+cs,cy,cx+cs,cy+cs)
 			};
-			for (GLine l : arms) { l.setColor(NEON_CYAN); add(l); }
+			for (GLine l : arms) { l.setColor(NEON_CYAN); addContent(l); }
 		}
 	}
  
@@ -102,16 +101,16 @@ public class DifficultyPane extends GraphicsPane {
 		GLabel title = new GLabel("SELECT  DIFFICULTY", 0, titleY);
 		title.setFont(fTitle); title.setColor(NEON_CYAN);
 		title.setLocation((W - title.getWidth()) / 2.0, titleY);
-		add(title);
+		addContent(title);
  
 		GLine ul = new GLine((W - title.getWidth()) / 2.0, titleY + 8,
 		                     (W + title.getWidth()) / 2.0, titleY + 8);
-		ul.setColor(DIM_CYAN); add(ul);
+		ul.setColor(DIM_CYAN); addContent(ul);
  
 		GLabel sub = new GLabel(">  CHOOSE YOUR THREAT CLASSIFICATION PROTOCOL", 0, titleY + 40);
 		sub.setFont(fSub); sub.setColor(new Color(0, 160, 190));
 		sub.setLocation((W - sub.getWidth()) / 2.0, titleY + 40);
-		add(sub);
+		addContent(sub);
 	}
  
 	private void drawDifficultyCards() {
@@ -131,24 +130,24 @@ public class DifficultyPane extends GraphicsPane {
 		card.setFilled(true);
 		card.setFillColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 28));
 		card.setColor(col);
-		add(card);
+		addContent(card);
  
 		GRect bar = new GRect(x, y, 5, h);
 		bar.setFilled(true); bar.setFillColor(col); bar.setColor(col);
-		add(bar);
+		addContent(bar);
  
 		GLabel nameLbl = new GLabel("   " + name, x+24, y+52);
 		nameLbl.setFont(fName); nameLbl.setColor(col);
-		add(nameLbl);
+		addContent(nameLbl);
  
 		GLabel descLbl = new GLabel(desc, x+26, y+96);
 		descLbl.setFont(fDesc); descLbl.setColor(new Color(160, 200, 215));
-		add(descLbl);
+		addContent(descLbl);
  
 		GLabel codeLbl = new GLabel(code, x+w-120, y+30);
 		codeLbl.setFont(fCode);
 		codeLbl.setColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 180));
-		add(codeLbl);
+		addContent(codeLbl);
  
 		return new Rectangle(x, y, w, h);
 	}
@@ -160,26 +159,26 @@ public class DifficultyPane extends GraphicsPane {
  
 		GRect btn = new GRect(bx, by, bw, bh);
 		btn.setFilled(true); btn.setFillColor(new Color(0,20,35)); btn.setColor(DIM_CYAN);
-		add(btn);
+		addContent(btn);
  
 		GLabel lbl = new GLabel("< BACK TO MENU", 0, 0);
 		lbl.setFont(fBack); lbl.setColor(new Color(0, 170, 200));
 		lbl.setLocation(bx + (bw - lbl.getWidth()) / 2.0, by + (bh / 2.0) + 8);
-		add(lbl);
+		addContent(lbl);
  
 		backRegion = new Rectangle(bx, by, bw, bh);
 	}
  
 	private void drawTickerBar() {
 		GLine div = new GLine(60, H-50, W-60, H-50);
-		div.setColor(DIM_CYAN); add(div);
+		div.setColor(DIM_CYAN); addContent(div);
  
 		GLabel ticker = new GLabel(
 			">>  FIREWALL FRENZY  |  SELECT DIFFICULTY  |  NOOB  //  PRO  //  HACKER  |  CHOOSE WISELY, OPERATOR",
 			0, H-22);
 		ticker.setFont(fTicker); ticker.setColor(new Color(0, 150, 180));
 		ticker.setLocation((W - ticker.getWidth()) / 2.0, H-22);
-		add(ticker);
+		addContent(ticker);
 	}
  
 	@Override
