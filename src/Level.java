@@ -27,4 +27,10 @@ public class Level {
     public boolean getIsComplete() {
     	return isComplete;
     }
+    
+    public void checkCompletion(int currentScore) {
+    	if (currentScore >= targetScore) {
+    		isComplete = true;
+    	}
+    }
 }
