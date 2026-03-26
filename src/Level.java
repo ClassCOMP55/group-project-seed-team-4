@@ -11,4 +11,20 @@ public class Level {
     	this.spawnRate = spawnRate;
     	this.isComplete = false;
     }
+    
+    public int getLevelNumbers() {
+    	return levelNumber;
+    }
+    
+    public int getTargetScore() {
+    	return targetScore;
+    }
+    
+    public double getSpawnRate() {
+    	return spawnRate;
+    }
+    
+    public boolean getIsComplete() {
+    	return isComplete;
+    }
 }
