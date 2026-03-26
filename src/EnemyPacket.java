@@ -11,4 +11,19 @@ public class EnemyPacket extends Packet{
         this.isSpawned = true;
 	}
 	
+	public String getEnemyType() {
+		return enemyType;
+	}
+	
+	public int getDamage() {
+		return damage;
+	}
+	
+	public boolean getisSpawned() {
+		return isSpawned;
+	}
+	
+	public void deactivate() {
+		isSpawned = false;
+	}
 }
