@@ -33,4 +33,8 @@ public class Level {
     		isComplete = true;
     	}
     }
+    
+    public void resetLevel() {
+    	isComplete = false;
+    }
 }
