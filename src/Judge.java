@@ -4,6 +4,21 @@ public class Judge {
 		Decision decision = convertZoneToDecision(zone);
 		Result result = new Result(false, decision, "");
 		
+		if (packet instanceof EnemyPacket) {
+            EnemyPacket enemyPacket = (EnemyPacket) packet;
+            result.isCorrect = (decision == Decision.BLOCK) && (enemyPacket.getType() != PacketType.GOOD);
+            result.reason = enemyPacket.getEnemyType() + " should be blocked!";
+//            if (result.isCorrect) {
+//                enemyPacket.deactivate(); 
+//                result.decision = Decision.BLOCK; 
+//            } else {
+//                result.decision = Decision.ALLOW; 
+//            }
+//        } else {
+//            // Handle normal packets
+//            result.isCorrect = (decision == ruleSet.classify(packet).decision);
+//            result.reason = "Packet handled according to rules.";
+        }
 		return null;
 	}
 
