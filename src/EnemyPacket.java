@@ -1,29 +1,27 @@
 
-public class EnemyPacket extends Packet{
-	private String enemyType;
-	private int damage;
-	private boolean isSpawned;
+public class EnemyPacket extends Packet {
 
-	public EnemyPacket(int id, PacketType type, String sourceIp, int port, double threatScore) {
-		super(id, type, sourceIp, port, threatScore);
-        this.enemyType = enemyType;
-        this.damage = damage;
+    private PacketType enemyType;
+    private int damage;
+    private boolean isSpawned;
+
+    public EnemyPacket(int id, PacketType type, String sourceIp, int port, double threatScore) {
+        super(id, type, sourceIp, port, threatScore);
+
+        this.enemyType = type;              // ✅ now matches type
+        this.damage = type.getDamage();     // ✅ from enum
         this.isSpawned = true;
-	}
-	
-	public String getEnemyType() {
-		return enemyType;
-	}
-	
-	public int getDamage() {
-		return damage;
-	}
-	
-	public boolean getisSpawned() {
-		return isSpawned;
-	}
-	
-	public void deactivate() {
-		isSpawned = false;
-	}
+    }
+
+    public PacketType getEnemyType() {
+        return enemyType;
+    }
+
+    public int getDamage() {
+        return damage;
+    }
+
+    public boolean isSpawned() {
+        return isSpawned;
+    }
 }
