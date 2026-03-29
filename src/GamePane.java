@@ -17,11 +17,39 @@ public class GamePane extends GraphicsPane {
 
     private GLabel scoreLabel;
     private int score;
+    private double enemySpeed;
+    private int spawnDelay;
+    private int maxEnemies;
+    private int lives;
 
     public GamePane(MainApplication mainScreen) {
         super(mainScreen);
         fScore = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 28f);
         score = 0;
+    }
+    public void startNewGame() {
+        score = 0;
+
+        String difficulty = mainScreen.getDifficulty();
+
+        if (difficulty.equals("NOOB")) {
+            lives = 5;
+            enemySpeed = 1.0;
+            spawnDelay = 2000;
+            maxEnemies = 3;
+        } 
+        else if (difficulty.equals("PRO")) {
+            lives = 3;
+            enemySpeed = 2.0;
+            spawnDelay = 1200;
+            maxEnemies = 5;
+        } 
+        else {
+            lives = 2;
+            enemySpeed = 3.5;
+            spawnDelay = 700;
+            maxEnemies = 8;
+        }
     }
 
     @Override

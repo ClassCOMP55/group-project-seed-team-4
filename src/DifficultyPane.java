@@ -183,17 +183,27 @@ public class DifficultyPane extends GraphicsPane {
  
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		int mx = e.getX(), my = e.getY();
-		
-		for (int i = 0; i < diffRegions.length; i++) {
-			if (diffRegions[i] != null && diffRegions[i].contains(mx, my)) {
-				mainScreen.switchToGameScreen();
-				return;
-			}
-		}
-		
-		if (backRegion != null && backRegion.contains(mx, my)) {
-			mainScreen.switchToWelcomeScreen();
-		}
-	}
+	    int mx = e.getX(), my = e.getY();
+
+	    for (int i = 0; i < diffRegions.length; i++) {
+	        if (diffRegions[i] != null && diffRegions[i].contains(mx, my)) {
+
+	            if (i == 0) {
+	                mainScreen.setDifficulty("NOOB");
+	            } else if (i == 1) {
+	                mainScreen.setDifficulty("PRO");
+	            } else {
+	                mainScreen.setDifficulty("HACKER");
+	            }
+
+	            mainScreen.switchToGameScreen();
+	            return;
+	        }
+	    }
+
+	    if (backRegion != null && backRegion.contains(mx, my)) {
+	        mainScreen.switchToWelcomeScreen();
+	    }
+
+}
 }

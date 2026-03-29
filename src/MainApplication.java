@@ -23,7 +23,12 @@ public class MainApplication extends GraphicsProgram {
 	private GamePane        gamePane;
 	private GameOverPane    gameOverPane;
 	private GraphicsPane    currentScreen;
- 
+	private String selectedDifficulty = "NOOB";
+
+	public void setDifficulty(String difficulty) {
+	    selectedDifficulty = difficulty;
+	}
+
 	public MainApplication() {
 		super();
 	}
@@ -93,8 +98,11 @@ public class MainApplication extends GraphicsProgram {
 	public void switchToSettingsScreen()    { switchToScreen(settingsPane);    }
 	public void switchToShopScreen()        { switchToScreen(shopPane);        }
 	public void switchToDifficultyScreen()  { switchToScreen(difficultyPane);  }
-	public void switchToGameScreen()        { switchToScreen(gamePane);        }
- 
+	public void switchToGameScreen() {
+	    gamePane.startNewGame();
+	    switchToScreen(gamePane);
+	}
+	
 	public void switchToGameOverScreen(int score, int lives, String cause) {
 		gameOverPane.setResults(score, lives, cause);
 		switchToScreen(gameOverPane);
@@ -109,6 +117,7 @@ public class MainApplication extends GraphicsProgram {
 		newScreen.showContent();
 		currentScreen = newScreen;
 	}
+	
  
 	public GObject getElementAtLocation(double x, double y) {
 		return getElementAt(x, y);
@@ -116,6 +125,10 @@ public class MainApplication extends GraphicsProgram {
  
 	public static void main(String[] args) {
 		new MainApplication().start();
+	}
+
+	public String getDifficulty() {
+	    return selectedDifficulty;
 	}
  
 	@Override public void mousePressed(MouseEvent e)  { if (currentScreen != null) currentScreen.mousePressed(e);  }
