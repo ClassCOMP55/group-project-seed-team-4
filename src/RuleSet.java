@@ -165,4 +165,9 @@ public class RuleSet {
     public void setBadPacketDamage(int badPacketDamage) {
         this.badPacketDamage = badPacketDamage;
     }
+
+	public Object classify(Packet packet) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

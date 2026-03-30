@@ -24,4 +24,9 @@ public class EnemyPacket extends Packet {
     public boolean isSpawned() {
         return isSpawned;
     }
+
+	public void deactivate() {
+		// TODO Auto-generated method stub
+		
+	}
 }
