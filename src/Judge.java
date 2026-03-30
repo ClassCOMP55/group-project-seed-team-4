@@ -23,7 +23,11 @@ public class Judge {
 	}
 
 	private Decision convertZoneToDecision(Zone zone) {
-		// TODO Auto-generated method stub
-		return null;
+		switch (zone) {
+        	case GREEN: return Decision.ALLOW;
+        	case RED: return Decision.BLOCK;
+        	case YELLOW: return Decision.QUARANTINE;
+        	default: return Decision.ALLOW;
+		}
 	}
 }
