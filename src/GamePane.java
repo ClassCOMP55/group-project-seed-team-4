@@ -21,12 +21,14 @@ public class GamePane extends GraphicsPane {
     private int spawnDelay;
     private int maxEnemies;
     private int lives;
+    private GLabel livesLabel;
 
     public GamePane(MainApplication mainScreen) {
         super(mainScreen);
         fScore = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 28f);
         score = 0;
     }
+    
     public void startNewGame() {
         score = 0;
 
@@ -50,6 +52,17 @@ public class GamePane extends GraphicsPane {
             spawnDelay = 700;
             maxEnemies = 8;
         }
+    }
+    
+    
+    
+    public void addEnemy(GObject enemy) {
+        addContent(enemy);
+    }
+
+    public void removeEnemy(GObject enemy) {
+        mainScreen.remove(enemy);
+        contents.remove(enemy);
     }
 
     @Override
@@ -99,6 +112,18 @@ public class GamePane extends GraphicsPane {
         score += delta;
         if (scoreLabel != null) {
             scoreLabel.setLabel("SCORE: " + score);
+        }
+    }
+    
+    public void loseLife() {
+        lives--;
+
+        if (livesLabel != null) {
+            livesLabel.setLabel("LIVES: " + lives);
+        }
+
+        if (lives <= 0) {
+            mainScreen.switchToGameOverScreen(score, lives, "FIREWALL BREACHED");
         }
     }
 
