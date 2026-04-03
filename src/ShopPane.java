@@ -26,7 +26,7 @@ public class ShopPane extends GraphicsPane {
 
 	// Placeholder shop items, no functionality yet
 	private static final String[] ITEM_NAMES  = {
-		"EXTRA LIFE",
+		"EXTRA LIFE", 
 	};
 	private static final String[] ITEM_DESCS  = {
 		"Adds one additional life to your session",
@@ -37,7 +37,6 @@ public class ShopPane extends GraphicsPane {
 	private static final Color[] ITEM_COLORS  = {
 		NEON_GREEN,
 	};
-
 	private static final int BLOCK_H = 584;
 	private static final int TOP_Y   = (H - BLOCK_H) / 2;
 
