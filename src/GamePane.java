@@ -176,10 +176,14 @@ public class GamePane extends GraphicsPane {
             mainScreen.switchToGameOverScreen(score, lives, "FIREWALL BREACHED");
         }
     }
-
+    
     @Override
     public void mousePressed(MouseEvent e) {
-        // Add click handling later
+        GObject clicked = mainScreen.getElementAtLocation(e.getX(), e.getY());
+
+        if (clicked != null && spawner != null && spawner.isEnemy(clicked)) {
+            spawner.destroyEnemy(clicked);
+        }
     }
 
     @Override
