@@ -74,4 +74,16 @@ public class PacketSpawner {
 
         enemies.removeAll(toRemove);
     }
+    public boolean isEnemy(GObject obj) {
+        return enemies.contains(obj);
+    }
+
+    public void destroyEnemy(GObject obj) {
+        if (obj instanceof GRect && enemies.contains(obj)) {
+            GRect enemy = (GRect) obj;
+            enemies.remove(enemy);
+            gamePane.removeEnemy(enemy);
+            gamePane.updateScore(100);
+        }
+    }
 }
