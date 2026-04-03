@@ -1,34 +1,38 @@
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import javax.swing.Timer;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import acm.graphics.*;
 
 public class GamePane extends GraphicsPane {
 
-    private static final int W = MainApplication.WINDOW_WIDTH;
-    private static final int H = MainApplication.WINDOW_HEIGHT;
-
     private static final Color BG = new Color(0, 1, 4);
     private static final Color GRID_COLOR = new Color(8, 28, 45);
     private static final Color SCORE_COLOR = new Color(57, 255, 100);
+    private static final Color LIVES_COLOR = new Color(255, 80, 80);
 
     private Font fScore;
 
     private GLabel scoreLabel;
+    private GLabel livesLabel;
+
     private int score;
     private double enemySpeed;
     private int spawnDelay;
     private int maxEnemies;
     private int lives;
-    private GLabel livesLabel;
+
+    private PacketSpawner spawner;
+    private Timer gameLoop;
 
     public GamePane(MainApplication mainScreen) {
         super(mainScreen);
         fScore = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 28f);
         score = 0;
     }
-    
+
     public void startNewGame() {
         score = 0;
 
@@ -39,30 +43,43 @@ public class GamePane extends GraphicsPane {
             enemySpeed = 1.0;
             spawnDelay = 2000;
             maxEnemies = 3;
-        } 
-        else if (difficulty.equals("PRO")) {
+        } else if (difficulty.equals("PRO")) {
             lives = 3;
             enemySpeed = 2.0;
             spawnDelay = 1200;
             maxEnemies = 5;
-        } 
-        else {
+        } else {
             lives = 2;
             enemySpeed = 3.5;
             spawnDelay = 700;
             maxEnemies = 8;
         }
-    }
-    
-    
-    
-    public void addEnemy(GObject enemy) {
-        addContent(enemy);
+
+        if (spawner != null) {
+            spawner.stop();
+        }
+
+        if (gameLoop != null) {
+            gameLoop.stop();
+        }
+
+        spawner = new PacketSpawner(this, spawnDelay, enemySpeed, maxEnemies);
+
+        gameLoop = new Timer(20, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (spawner != null) {
+                    spawner.updateEnemies();
+                }
+            }
+        });
     }
 
-    public void removeEnemy(GObject enemy) {
-        mainScreen.remove(enemy);
-        contents.remove(enemy);
+    public void addEnemy(GRect enemy) {
+        add(enemy);
+    }
+
+    public void removeEnemy(GRect enemy) {
+        remove(enemy);
     }
 
     @Override
@@ -70,17 +87,32 @@ public class GamePane extends GraphicsPane {
         drawBackground();
         drawGrid();
         drawScore();
-        // TODO: Add packets and other game elements here
+        drawLives();
+
+        if (spawner != null) {
+            spawner.start();
+        }
+
+        if (gameLoop != null) {
+            gameLoop.start();
+        }
     }
 
     @Override
     public void hideContent() {
-        for (GObject o : contents) mainScreen.remove(o);
-        contents.clear();
+        if (spawner != null) {
+            spawner.stop();
+        }
+
+        if (gameLoop != null) {
+            gameLoop.stop();
+        }
+
+        super.hideContent();
     }
 
     private void drawBackground() {
-        GRect bg = new GRect(0, 0, W, H);
+        GRect bg = new GRect(0, 0, MainApplication.WINDOW_WIDTH, MainApplication.WINDOW_HEIGHT);
         bg.setFilled(true);
         bg.setFillColor(BG);
         bg.setColor(BG);
@@ -89,13 +121,15 @@ public class GamePane extends GraphicsPane {
 
     private void drawGrid() {
         int s = 60;
-        for (int x = 0; x <= W; x += s) {
-            GLine l = new GLine(x, 0, x, H);
+
+        for (int x = 0; x <= MainApplication.WINDOW_WIDTH; x += s) {
+            GLine l = new GLine(x, 0, x, MainApplication.WINDOW_HEIGHT);
             l.setColor(GRID_COLOR);
             add(l);
         }
-        for (int y = 0; y <= H; y += s) {
-            GLine l = new GLine(0, y, W, y);
+
+        for (int y = 0; y <= MainApplication.WINDOW_HEIGHT; y += s) {
+            GLine l = new GLine(0, y, MainApplication.WINDOW_WIDTH, y);
             l.setColor(GRID_COLOR);
             add(l);
         }
@@ -108,13 +142,21 @@ public class GamePane extends GraphicsPane {
         add(scoreLabel);
     }
 
+    private void drawLives() {
+        livesLabel = new GLabel("LIVES: " + lives, 20, 80);
+        livesLabel.setFont(fScore);
+        livesLabel.setColor(LIVES_COLOR);
+        add(livesLabel);
+    }
+
     public void updateScore(int delta) {
         score += delta;
+
         if (scoreLabel != null) {
             scoreLabel.setLabel("SCORE: " + score);
         }
     }
-    
+
     public void loseLife() {
         lives--;
 
@@ -123,40 +165,49 @@ public class GamePane extends GraphicsPane {
         }
 
         if (lives <= 0) {
+            if (spawner != null) {
+                spawner.stop();
+            }
+
+            if (gameLoop != null) {
+                gameLoop.stop();
+            }
+
             mainScreen.switchToGameOverScreen(score, lives, "FIREWALL BREACHED");
         }
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        // TODO: Handle packet clicks or other interactions
+        // Add click handling later
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) { }
+    public void mouseReleased(MouseEvent e) {
+    }
 
     @Override
-    public void mouseClicked(MouseEvent e) { }
+    public void mouseClicked(MouseEvent e) {
+    }
 
     @Override
-    public void mouseDragged(MouseEvent e) { }
+    public void mouseDragged(MouseEvent e) {
+    }
 
     @Override
-    public void mouseMoved(MouseEvent e) { }
+    public void mouseMoved(MouseEvent e) {
+    }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        // TODO: Handle keyboard input
+        // Add keyboard controls later
     }
 
     @Override
-    public void keyReleased(KeyEvent e) { }
+    public void keyReleased(KeyEvent e) {
+    }
 
     @Override
-    public void keyTyped(KeyEvent e) { }
-
-    private void addContent(GObject o) {
-        contents.add(o);
-        mainScreen.add(o);
+    public void keyTyped(KeyEvent e) {
     }
 }
