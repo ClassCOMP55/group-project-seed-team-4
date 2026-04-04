@@ -17,6 +17,13 @@ public class CurrencyManager {
 	}
 	
 	public boolean spendTokens(int amount) {
-		return true;
+		if (secureTokens >= amount) {
+			secureTokens -= amount;
+			return true;
+		}
+		return false;
 	}
+	
+	public int getTokens() {return secureTokens;}
+	public void setTokens(int tokens) {this.secureTokens = tokens;}
 }
