@@ -6,4 +6,17 @@ public class CurrencyManager {
 	public CurrencyManager() {
 		this.secureTokens = 0;
 	}
+	
+	public void addTokensFromScore(int score, String difficulty) {
+		double rate = CONVERSION_RATES[0];
+		if (difficulty.equals("PRO")) rate = CONVERSION_RATES[1];
+		else if (difficulty.equals("HACKER")) rate = CONVERSION_RATES[2];
+		
+		int tokensEarned = (int) (score * rate);
+		secureTokens += tokensEarned;
+	}
+	
+	public boolean spendTokens(int amount) {
+		return true;
+	}
 }
