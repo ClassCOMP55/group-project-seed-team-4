@@ -26,16 +26,24 @@ public class ShopPane extends GraphicsPane {
 
 	// Placeholder shop items, no functionality yet
 	private static final String[] ITEM_NAMES  = {
-		"EXTRA LIFE", 
+		"EXTRA LIFE",
+		"PECULIAR AUDIENCE",
+		"EYE OF RA"
 	};
 	private static final String[] ITEM_DESCS  = {
 		"Adds one additional life to your session",
+		"Every time you hit an enemy, another random enemy is also hit",
+		"Exposes disguised enemies for the duratrion"
 	};
 	private static final String[] ITEM_PRICES = {
 		"800 PTS",
+		"1200 PTS",
+		"1500 PTS"
 	};
 	private static final Color[] ITEM_COLORS  = {
 		NEON_GREEN,
+		NEON_PURP,
+		NEON_YELLOW
 	};
 	private static final int BLOCK_H = 584;
 	private static final int TOP_Y   = (H - BLOCK_H) / 2;
