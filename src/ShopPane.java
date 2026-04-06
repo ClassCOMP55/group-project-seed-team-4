@@ -153,12 +153,12 @@ public class ShopPane extends GraphicsPane {
 		for (int i = 0; i < ITEM_NAMES.length; i++) {
 			int cy = startY + i * (cardH + gap);
 			drawItemCard(cardX, cy, cardW, cardH,
-				ITEM_NAMES[i], ITEM_DESCS[i], ITEM_PRICES[i], ITEM_COLORS[i]);
+				ITEM_NAMES[i], ITEM_DESCS[i], ITEM_PRICES[i], ITEM_COLORS[i], i);
 		}
 	}
 
 	private void drawItemCard(int x, int y, int w, int h,
-			String name, String desc, String price, Color col) {
+			String name, String desc, String price, Color col, int index) {
 		// Card background
 		GRect card = new GRect(x, y, w, h);
 		card.setFilled(true);
@@ -194,7 +194,7 @@ public class ShopPane extends GraphicsPane {
 		priceBox.setFilled(false); priceBox.setColor(new Color(100, 80, 0));
 		addContent(priceBox);
 		
-		//itemRegions[index] = new Rectangle(x, y, w, h);
+		itemRegions[index] = new Rectangle(x, y, w, h);
 	}
 
 	private void drawBackButton() {
