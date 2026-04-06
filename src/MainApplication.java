@@ -23,6 +23,7 @@ public class MainApplication extends GraphicsProgram {
 	private GameOverPane    gameOverPane;
 	private GraphicsPane    currentScreen;
 	private String selectedDifficulty = "NOOB";
+	private CurrencyManager currencyManager;
 
 	public void setDifficulty(String difficulty) {
 	    selectedDifficulty = difficulty;
@@ -84,7 +85,8 @@ public class MainApplication extends GraphicsProgram {
 		welcomePane     = new WelcomePane(this);
 		descriptionPane = new DescriptionPane(this);
 		settingsPane    = new SettingsPane(this);
-		shopPane        = new ShopPane(this);
+		currencyManager = new CurrencyManager();
+		shopPane        = new ShopPane(this, currencyManager);
 		difficultyPane  = new DifficultyPane(this);
 		gamePane        = new GamePane(this);
 		gameOverPane    = new GameOverPane(this);

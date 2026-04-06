@@ -50,7 +50,7 @@ public class ShopPane extends GraphicsPane {
 
 	private Rectangle backRegion;
 
-	public ShopPane(MainApplication mainScreen) {
+	public ShopPane(MainApplication mainScreen, CurrencyManager currencyManager) {
 		super(mainScreen);
 		fTitle     = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD,  52f);
 		fSub       = MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 20f);
