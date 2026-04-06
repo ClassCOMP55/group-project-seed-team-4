@@ -47,13 +47,11 @@ public class PacketSpawner {
     private void spawnEnemy() {
         if (enemies.size() >= maxEnemies) return;
 
-        // Create a simple square packet
         double x = Math.random() * (MainApplication.WINDOW_WIDTH - 40);
         double y = 0;
 
-        GRect enemy = new GRect(x, y, 40, 40);
-        enemy.setFilled(true);
-        enemy.setFillColor(Color.RED);
+        GImage enemy = new GImage("C:/Users/adami/git/group-project-seed-team-4/src/Images/VirusPacket.png", x, y);
+        enemy.setSize(40, 40);
 
         enemies.add(enemy);
         gamePane.addEnemy(enemy);
