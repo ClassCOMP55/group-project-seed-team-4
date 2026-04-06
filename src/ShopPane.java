@@ -291,4 +291,4 @@ public class ShopPane extends GraphicsPane {
 			}
 		}
 	}
-}
+}//
