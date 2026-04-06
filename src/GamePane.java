@@ -74,12 +74,13 @@ public class GamePane extends GraphicsPane {
         });
     }
 
-    public void addEnemy(GRect enemy) {
-        add(enemy);
+    public void addEnemy(GObject enemy) {
+        addContent(enemy);
     }
 
-    public void removeEnemy(GRect enemy) {
-        remove(enemy);
+    public void removeEnemy(GObject enemy) {
+        mainScreen.remove(enemy);
+        contents.remove(enemy);
     }
 
     @Override
@@ -110,13 +111,18 @@ public class GamePane extends GraphicsPane {
 
         super.hideContent();
     }
+    
+    private void addContent(GObject o) {
+        contents.add(o);
+        mainScreen.add(o);
+    }
 
     private void drawBackground() {
         GRect bg = new GRect(0, 0, MainApplication.WINDOW_WIDTH, MainApplication.WINDOW_HEIGHT);
         bg.setFilled(true);
         bg.setFillColor(BG);
         bg.setColor(BG);
-        add(bg);
+        addContent(bg);
     }
 
     private void drawGrid() {
@@ -125,13 +131,13 @@ public class GamePane extends GraphicsPane {
         for (int x = 0; x <= MainApplication.WINDOW_WIDTH; x += s) {
             GLine l = new GLine(x, 0, x, MainApplication.WINDOW_HEIGHT);
             l.setColor(GRID_COLOR);
-            add(l);
+            addContent(l);
         }
 
         for (int y = 0; y <= MainApplication.WINDOW_HEIGHT; y += s) {
             GLine l = new GLine(0, y, MainApplication.WINDOW_WIDTH, y);
             l.setColor(GRID_COLOR);
-            add(l);
+            addContent(l);
         }
     }
 
@@ -139,14 +145,14 @@ public class GamePane extends GraphicsPane {
         scoreLabel = new GLabel("SCORE: " + score, 20, 40);
         scoreLabel.setFont(fScore);
         scoreLabel.setColor(SCORE_COLOR);
-        add(scoreLabel);
+        addContent(scoreLabel);
     }
 
     private void drawLives() {
         livesLabel = new GLabel("LIVES: " + lives, 20, 80);
         livesLabel.setFont(fScore);
         livesLabel.setColor(LIVES_COLOR);
-        add(livesLabel);
+        addContent(livesLabel);
     }
 
     public void updateScore(int delta) {
