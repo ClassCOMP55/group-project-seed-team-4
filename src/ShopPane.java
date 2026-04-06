@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.JOptionPane;
 import acm.graphics.*;
 
 public class ShopPane extends GraphicsPane {
@@ -49,9 +50,17 @@ public class ShopPane extends GraphicsPane {
 	private static final int TOP_Y   = (H - BLOCK_H) / 2;
 
 	private Rectangle backRegion;
+	
+	//Currency and UI
+	private CurrencyManager currencyManager;
+	private GLabel tokenLabel;
+	private Rectangle[] itemRegions;
+	private int[] itemCosts;
 
 	public ShopPane(MainApplication mainScreen, CurrencyManager currencyManager) {
 		super(mainScreen);
+		this.currencyManager = currencyManager;
+		
 		fTitle     = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD,  52f);
 		fSub       = MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 20f);
 		fItemName  = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD,  28f);
