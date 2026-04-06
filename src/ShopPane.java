@@ -292,4 +292,4 @@ public class ShopPane extends GraphicsPane {
 		}
 	}
 }
-
+//should be good.
