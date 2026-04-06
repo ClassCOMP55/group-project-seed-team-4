@@ -87,6 +87,7 @@ public class ShopPane extends GraphicsPane {
 		drawShopItems();
 		drawBackButton();
 		drawTickerBar();
+		drawTokenDisplay();
 	}
 
 	@Override
@@ -94,6 +95,7 @@ public class ShopPane extends GraphicsPane {
 		for (GObject o : contents) mainScreen.remove(o);
 		contents.clear();
 		backRegion = null;
+		tokenLabel = null;
 	}
 
 	private void addContent(GObject o) { contents.add(o); mainScreen.add(o); }
@@ -151,12 +153,12 @@ public class ShopPane extends GraphicsPane {
 		for (int i = 0; i < ITEM_NAMES.length; i++) {
 			int cy = startY + i * (cardH + gap);
 			drawItemCard(cardX, cy, cardW, cardH,
-				ITEM_NAMES[i], ITEM_DESCS[i], ITEM_PRICES[i], ITEM_COLORS[i]);
+				ITEM_NAMES[i], ITEM_DESCS[i], ITEM_PRICES[i], ITEM_COLORS[i], i);
 		}
 	}
 
 	private void drawItemCard(int x, int y, int w, int h,
-			String name, String desc, String price, Color col) {
+			String name, String desc, String price, Color col, int index) {
 		// Card background
 		GRect card = new GRect(x, y, w, h);
 		card.setFilled(true);
@@ -191,6 +193,8 @@ public class ShopPane extends GraphicsPane {
 			priceLbl.getWidth() + 24, 34);
 		priceBox.setFilled(false); priceBox.setColor(new Color(100, 80, 0));
 		addContent(priceBox);
+		
+		itemRegions[index] = new Rectangle(x, y, w, h);
 	}
 
 	private void drawBackButton() {
@@ -221,12 +225,70 @@ public class ShopPane extends GraphicsPane {
 		ticker.setLocation((W - ticker.getWidth()) / 2.0, H-22);
 		addContent(ticker);
 	}
+	
+	private void drawTokenDisplay() {
+		if (tokenLabel != null) {
+			mainScreen.remove(tokenLabel);
+			contents.remove(tokenLabel);
+		}
+		String txt = "Secure Tokens: " + currencyManager.getTokens();
+		tokenLabel = new GLabel(txt, 0, 0);
+		tokenLabel.setFont(fSub);
+		tokenLabel.setColor(new Color(200, 240, 255));
+		double tx = W - tokenLabel.getWidth() - 20;
+		double ty = TOP_Y + 30;
+		tokenLabel.setLocation(tx, ty);
+		addContent(tokenLabel);
+	}
+
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		int mx = e.getX(), my = e.getY();
 		if (backRegion != null && backRegion.contains(mx, my)) {
 			mainScreen.switchToWelcomeScreen();
+			return;
+		}
+
+		for (int i = 0; i < itemRegions.length; i++) {
+			Rectangle r = itemRegions[i];
+			if (r != null && r.contains(mx, my)) {
+				handlePurchase(i);
+				return;
+			}
 		}
 	}
-}
+
+	private void handlePurchase(int index) {
+		int cost = itemCosts[index];
+		if (currencyManager.getTokens() < cost) {
+			JOptionPane.showMessageDialog(null,
+				"Not enough Secure Tokens to purchase \"" + ITEM_NAMES[index] + "\".",
+				"Insufficient Tokens",
+				JOptionPane.WARNING_MESSAGE);
+			return;
+		}
+
+		int choice = JOptionPane.showConfirmDialog(null,
+			"Buy \"" + ITEM_NAMES[index] + "\" for " + cost + " Secure Tokens?",
+			"Confirm Purchase",
+			JOptionPane.YES_NO_OPTION);
+
+		if (choice == JOptionPane.YES_OPTION) {
+			boolean ok = currencyManager.spendTokens(cost);
+			if (ok) {
+				// TODO: apply item effect (set flags in mainScreen or elsewhere)
+				JOptionPane.showMessageDialog(null,
+					"Purchased \"" + ITEM_NAMES[index] + "\".",
+					"Purchase Successful",
+					JOptionPane.INFORMATION_MESSAGE);
+				drawTokenDisplay();
+			} else {
+				JOptionPane.showMessageDialog(null,
+					"Not enough Secure Tokens to complete transaction.",
+					"Insufficient Tokens",
+					JOptionPane.WARNING_MESSAGE);
+			}
+		}
+	}
+}//
