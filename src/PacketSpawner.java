@@ -3,6 +3,7 @@ import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import acm.graphics.*;
+import java.awt.Color;
 
 public class PacketSpawner {
 
@@ -14,7 +15,7 @@ public class PacketSpawner {
     private double enemySpeed;
     private int maxEnemies;
 
-    private ArrayList<GRect> enemies;
+    private ArrayList<GObject> enemies;
 
     public PacketSpawner(GamePane gamePane, int spawnDelay, double enemySpeed, int maxEnemies) {
         this.gamePane = gamePane;
@@ -22,7 +23,7 @@ public class PacketSpawner {
         this.enemySpeed = enemySpeed;
         this.maxEnemies = maxEnemies;
 
-        enemies = new ArrayList<>();
+        enemies = new ArrayList<GObject>();
 
         setupTimer();
     }
@@ -52,16 +53,16 @@ public class PacketSpawner {
 
         GRect enemy = new GRect(x, y, 40, 40);
         enemy.setFilled(true);
-        enemy.setFillColor(java.awt.Color.RED);
+        enemy.setFillColor(Color.RED);
 
         enemies.add(enemy);
         gamePane.addEnemy(enemy);
     }
 
     public void updateEnemies() {
-        ArrayList<GRect> toRemove = new ArrayList<>();
+    	ArrayList<GObject> toRemove = new ArrayList<>();
 
-        for (GRect enemy : enemies) {
+    	for (GObject enemy : enemies) {
             enemy.move(0, enemySpeed);
 
             // If it reaches bottom → remove + lose life
