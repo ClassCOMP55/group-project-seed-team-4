@@ -68,6 +68,14 @@ public class ShopPane extends GraphicsPane {
 		fItemPrice = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD,  20f);
 		fBack      = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD,  22f);
 		fTicker    = MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 17f);
+		
+		itemRegions = new Rectangle[ITEM_NAMES.length];
+		itemCosts = new int[ITEM_PRICES.length];
+		for (int i = 0; i < ITEM_PRICES.length; i++) {
+			String s = ITEM_PRICES[i].replaceAll("[^0-9]", "");
+			try {itemCosts[i] = Integer.parseInt(s);}
+			catch (NumberFormatException ex) {itemCosts[i] = 0;}
+		}
 	}
 
 	@Override
