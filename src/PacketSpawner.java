@@ -47,6 +47,11 @@ public class PacketSpawner {
 
     private void spawnEnemy() {
         if (enemies.size() >= maxEnemies) return;
+        
+        //apply phishing spawn-rate boost
+        if(phishingActive && Math.random() < 0.5) {
+        	//spawn an extra phishing more often
+        }
 
         double x = Math.random() * (MainApplication.WINDOW_WIDTH - 40);
         double y = 0;
@@ -56,6 +61,8 @@ public class PacketSpawner {
 
         enemies.add(enemy);
         gamePane.addEnemy(enemy);
+        
+        //PacketType type = randomPacketTypeByDifficulty();
     }
 
     public void updateEnemies() {
