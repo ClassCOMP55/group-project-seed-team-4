@@ -46,6 +46,11 @@ public class MainApplication extends GraphicsProgram {
  
 		addKeyListeners();
 		addMouseListeners();
+		
+		SoundPlayer sp = new SoundPlayer();
+		// Assuming file is in project root/resources/background.wav
+		sp.playSound("resources/background.wav");
+
 	}
  
 	private void loadFonts() {
