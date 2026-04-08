@@ -231,6 +231,14 @@ public class GamePane extends GraphicsPane {
     	skillDisableTimer.start();
     }
     
+    public boolean stealAbilityOrLife() {
+    	if (abilitiesCount > 0) {
+    		abilitiesCount--;
+    		return true;
+    	}
+    	return false;
+    }
+    
     @Override
     public void mousePressed(MouseEvent e) {
         GObject clicked = mainScreen.getElementAtLocation(e.getX(), e.getY());
