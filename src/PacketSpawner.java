@@ -36,8 +36,14 @@ public class PacketSpawner {
     public void stop() {
         spawnTimer.stop();
     }
-    
-    
+    //------HERE BOY------GOOD FIGHT---
+//    private PacketType randomPacketTypeByDifficulty() {
+//    	if(d < 0.40) return PacketType.GOOD;
+//    	if(d < 0.60) return PacketType.PHISHING;
+//    	if(d < 0.75) return PacketType.MALWARE;
+//    	if(d < 0.90) return PacketType.DDOS;
+//    	return PacketType.SPOOF;
+//    }
 
     private void spawnEnemy() {
         if (enemies.size() >= maxEnemies) return;
