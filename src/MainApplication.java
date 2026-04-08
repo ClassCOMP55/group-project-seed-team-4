@@ -49,7 +49,7 @@ public class MainApplication extends GraphicsProgram {
 		
 		SoundPlayer sp = new SoundPlayer();
 		// Assuming file is in project root/resources/background.wav
-		sp.playSound("resources/background.wav");
+		sp.playSound("/sounds/18e8-7422-4adc-a195-041a574655e1.wav");
 
 	}
  

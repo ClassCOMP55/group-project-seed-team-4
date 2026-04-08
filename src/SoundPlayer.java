@@ -1,24 +1,18 @@
-import java.io.File;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
+import javax.sound.sampled.*;
+import java.io.InputStream;
 
 public class SoundPlayer {
-    public void playSound(String soundFilePath) {
+    public void playSound(String resourcePath) {
         try {
-            // Locate file relative to the project directory
-            File soundFile = new File(soundFilePath);
-            AudioInputStream audioIn = AudioSystem.getAudioInputStream(soundFile);
-            
-            // Get sound clip resource
+            InputStream audioSrc = getClass().getResourceAsStream(resourcePath);
+            InputStream bufferedIn = new java.io.BufferedInputStream(audioSrc);
+            AudioInputStream audioIn = AudioSystem.getAudioInputStream(bufferedIn);
+
             Clip clip = AudioSystem.getClip();
             clip.open(audioIn);
-            
-            // Start playing
             clip.start();
-            
-            // Optional: loop the music
             clip.loop(Clip.LOOP_CONTINUOUSLY);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
