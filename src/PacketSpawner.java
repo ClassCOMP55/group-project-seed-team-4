@@ -13,15 +13,15 @@ public class PacketSpawner {
     private int maxEnemies;
     private ArrayList<GObject> enemies = new ArrayList<>();
     private Map<GObject, PacketType> typeMap = new HashMap<>();
+    private boolean phishingActive = false;
+    private Timer phishingTimer;
+    private int goodPacketClicks = 0;
 
     public PacketSpawner(GamePane gamePane, int spawnDelay, double baseEnemySpeed, int maxEnemies) {
         this.gamePane = gamePane;
         this.spawnDelay = spawnDelay;
         this.baseEnemySpeed = baseEnemySpeed;
         this.maxEnemies = maxEnemies;
-
-        enemies = new ArrayList<GObject>();
-
         setupTimer();
     }
 
