@@ -239,6 +239,12 @@ public class GamePane extends GraphicsPane {
     	return false;
     }
     
+    public boolean areSkillsEnabled() {
+    	return skillsEnabled;
+    }
+    
+    
+    
     @Override
     public void mousePressed(MouseEvent e) {
         GObject clicked = mainScreen.getElementAtLocation(e.getX(), e.getY());
