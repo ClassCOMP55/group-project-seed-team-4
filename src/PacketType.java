@@ -10,14 +10,15 @@ public enum PacketType {
     private boolean isBad;
     private int damage;   
     private double baseSpeedMult;// damage to base
-    private int speed;      // how fast it moves
-    private int points;     // points when destroyed
+    private int points;
+    private Color color;// points when destroyed
 
     PacketType(boolean isBad, int damage, double baseSpeedMult, int points, Color color) {
         this.isBad = isBad;
         this.damage = damage;
         this.baseSpeedMult = baseSpeedMult;
         this.points = points;
+        this.color = color;
     }
 
     // getters
@@ -29,11 +30,15 @@ public enum PacketType {
         return damage;
     }
 
-    public int getSpeed() {
-        return speed;
+    public double getBaseSpeedMult() {
+        return baseSpeedMult;
     }
 
     public int getPoints() {
         return points;
+    }
+    
+    public Color getColor() {
+    	return color;
     }
 }
