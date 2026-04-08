@@ -214,7 +214,21 @@ public class GamePane extends GraphicsPane {
         });
         abilityExpireTimer.setRepeats(false);
         abilityExpireTimer.start();
-
+    }
+    
+    public void disableSkillsTemporarily(int milliseconds) {
+    	skillsEnabled = false;
+    	if (skillDisableTimer != null && skillDisableTimer.isRunning()) {
+    		skillDisableTimer.stop();
+    	}
+    	skillDisableTimer = new Timer(milliseconds, new ActionListener() {
+    		public void actionPerformed(ActionEvent e) {
+    			skillsEnabled = true;
+    			skillDisableTimer.stop();
+    		}
+    	});
+    	skillDisableTimer.setRepeats(false);
+    	skillDisableTimer.start();
     }
     
     @Override
