@@ -26,6 +26,12 @@ public class GamePane extends GraphicsPane {
 
     private PacketSpawner spawner;
     private Timer gameLoop;
+    
+    private int goodPacketClicks = 0;
+    private int abilitiesCount = 0;
+    private boolean skillsEnabled = true;
+    private Timer skillDisableTimer;
+    private Timer abilityExpireTimer;
 
     public GamePane(MainApplication mainScreen) {
         super(mainScreen);
@@ -35,6 +41,11 @@ public class GamePane extends GraphicsPane {
 
     public void startNewGame() {
         score = 0;
+        goodPacketClicks = 0;
+        abilitiesCount = 0;
+        skillsEnabled = true;
+        if (skillDisableTimer != null && skillDisableTimer.isRunning()) skillDisableTimer.stop();
+        if (abilityExpireTimer != null && abilityExpireTimer.isRunning()) abilityExpireTimer.stop();
 
         String difficulty = mainScreen.getDifficulty();
 
