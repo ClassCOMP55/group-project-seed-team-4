@@ -88,6 +88,42 @@ public class PacketSpawner {
         });
     }
 
+    //-----HERE GOOD FIGHT BOY!-------
+//    private void handleClickOnPacket(GObject obj) {
+//    	PacketType type = typeMap.get(obj);
+//    	if(type == null) return;
+//    	
+//    	removeEnemy(obj);
+//    	
+//    	if(type == PacketType.GOOD) {
+//    		gamePane.updateScore(type.getPoints());
+//    		goodPacketClicks++;
+//    		if(goodPacketClicks == 10) {
+//    			gamePane.addLife(1);
+//    		}
+//    		else if (goodPacketClicks == 25) {
+//    			gamePane.grantTemporaryAbity(5); //gives an ability for 5s
+//    		}
+//    	}
+//    	else if (type == PacketType.PHISHING) {
+//            gamePane.updateScore(type.getPoints());
+//            triggerPhishingBurst();
+//        } else if (type == PacketType.MALWARE) {
+//            gamePane.updateScore(type.getPoints());
+//            // Example: malware deals damage if reaches bottom. On click it's destroyed as above.
+//        } else if (type == PacketType.DDOS) {
+//            gamePane.updateScore(type.getPoints());
+//            // DDOS clicked -> destroyed; if not clicked and reaches bottom -> disable skills (handled on reach-bottom)
+//        } else if (type == PacketType.SPOOF) {
+//            // clicking a Spoof steals life/ability
+//            if (!gamePane.stealAbilityOrLife()) {
+//                // fallback: steal life if ability wasn't available
+//                gamePane.loseLife();
+//            }
+//        }
+//
+//    }
+    
     public void updateEnemies() {
     	ArrayList<GObject> toRemove = new ArrayList<>();
 
