@@ -56,13 +56,36 @@ public class PacketSpawner {
         double x = Math.random() * (MainApplication.WINDOW_WIDTH - 40);
         double y = 0;
 
-        GImage enemy = new GImage("C:/Users/adami/git/group-project-seed-team-4/src/Images/VirusPacket.png", x, y);
-        enemy.setSize(40, 40);
+        GImage benemy = new GImage("C:/Users/adami/git/group-project-seed-team-4/src/Images/VirusPacket.png", x, y);
+        benemy.setSize(40, 40);
 
-        enemies.add(enemy);
-        gamePane.addEnemy(enemy);
+        enemies.add(benemy);
+        gamePane.addEnemy(benemy);
         
         //PacketType type = randomPacketTypeByDifficulty();
+        
+        GRect enemy = new GRect(x, y, 40, 40);
+        enemy.setFilled(true);
+        //-----LOOOK HERE-----
+        //Trying to make phishing and spoof look similar to good
+//        if(type == PacketType.PHISHING || type == PacketType.SPOOF) {
+//        	enemy.setColor((Color.CYAN.darker());
+//        	enemy.setFillColor(Color.CYAN.darker());
+//        }
+//        else {
+//        	enemy.setColor(type.getColor());
+//        	enemy.setFillColor(type.getColor());
+//        }
+        
+        enemies.add(enemy);
+        //typeMap.put(enemy,  type);
+        gamePane.addEnemy(enemy);
+        
+        enemy.addMouseListener(new java.awt.event.MouseAdapter() {
+        	public void mouseClicked(java.awt.event.MouseEvent e) {
+        		//handleClickOnPacket(enemy);
+        	}
+        });
     }
 
     public void updateEnemies() {
