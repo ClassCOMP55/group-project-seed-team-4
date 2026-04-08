@@ -7,19 +7,17 @@ import java.awt.Color;
 public class PacketSpawner {
 
     private GamePane gamePane;
-
     private Timer spawnTimer;
-
     private int spawnDelay;
-    private double enemySpeed;
+    private double baseEnemySpeed;
     private int maxEnemies;
+    private ArrayList<GObject> enemies = new ArrayList<>();
+    private Map<GObject, PacketType> typeMap = new HashMap<>();
 
-    private ArrayList<GObject> enemies;
-
-    public PacketSpawner(GamePane gamePane, int spawnDelay, double enemySpeed, int maxEnemies) {
+    public PacketSpawner(GamePane gamePane, int spawnDelay, double baseEnemySpeed, int maxEnemies) {
         this.gamePane = gamePane;
         this.spawnDelay = spawnDelay;
-        this.enemySpeed = enemySpeed;
+        this.baseEnemySpeed = baseEnemySpeed;
         this.maxEnemies = maxEnemies;
 
         enemies = new ArrayList<GObject>();
@@ -60,7 +58,7 @@ public class PacketSpawner {
     	ArrayList<GObject> toRemove = new ArrayList<>();
 
     	for (GObject enemy : enemies) {
-            enemy.move(0, enemySpeed);
+            enemy.move(0, baseEnemySpeed);
 
             // If it reaches bottom → remove + lose life
             if (enemy.getY() > MainApplication.WINDOW_HEIGHT) {
