@@ -26,11 +26,7 @@ public class PacketSpawner {
     }
 
     private void setupTimer() {
-        spawnTimer = new Timer(spawnDelay, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                spawnEnemy();
-            }
-        });
+      spawnTimer = new Timer(spawnDelay, e -> spawnEnemy());
     }
 
     public void start() {
@@ -40,6 +36,8 @@ public class PacketSpawner {
     public void stop() {
         spawnTimer.stop();
     }
+    
+    
 
     private void spawnEnemy() {
         if (enemies.size() >= maxEnemies) return;
