@@ -194,6 +194,29 @@ public class GamePane extends GraphicsPane {
         }
     }
     
+    public void addLife(int n) {
+    	lives += n;
+    	if (livesLabel != null) {
+    		livesLabel.setLabel("LIVES: " + lives);
+    	}
+    }
+    
+    public void grantTemporaryAbility(int seconds) {
+    	abilitiesCount++;
+    	if (abilityExpireTimer != null && abilityExpireTimer.isRunning()) {
+    		abilityExpireTimer.stop();
+    	}
+    	abilityExpireTimer = new Timer(seconds * 1000, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (abilitiesCount > 0) abilitiesCount--;
+                abilityExpireTimer.stop();
+            }
+        });
+        abilityExpireTimer.setRepeats(false);
+        abilityExpireTimer.start();
+
+    }
+    
     @Override
     public void mousePressed(MouseEvent e) {
         GObject clicked = mainScreen.getElementAtLocation(e.getX(), e.getY());
