@@ -243,7 +243,9 @@ public class GamePane extends GraphicsPane {
     	return skillsEnabled;
     }
     
-    
+    public int getAbilityCount() {
+    	return abilitiesCount;
+    }
     
     @Override
     public void mousePressed(MouseEvent e) {
