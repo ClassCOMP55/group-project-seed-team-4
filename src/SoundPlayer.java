@@ -19,4 +19,16 @@ public class SoundPlayer {
             e.printStackTrace();
         }
     }
+    
+    public void stopSound() {
+        try {
+            if (clip != null) {
+                clip.stop();
+                clip.close();
+                clip = null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
