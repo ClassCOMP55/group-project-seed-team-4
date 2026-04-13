@@ -5,7 +5,7 @@ public class SoundPlayer {
 	private Clip clip;
     public void playSound(String resourcePath) {
     	try {
-            //stopSound(); // stop previous if any
+            stopSound(); // stop previous if any
             InputStream audioSrc = getClass().getResourceAsStream(resourcePath);
             if (audioSrc == null) return;
             InputStream bufferedIn = new java.io.BufferedInputStream(audioSrc);
@@ -30,5 +30,9 @@ public class SoundPlayer {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    public boolean isPlaying() {
+        return clip != null && clip.isRunning();
     }
 }
