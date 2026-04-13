@@ -24,6 +24,7 @@ public class MainApplication extends GraphicsProgram {
 	private GraphicsPane    currentScreen;
 	private String selectedDifficulty = "NOOB";
 	private CurrencyManager currencyManager;
+	private SoundPlayer     soundPlayer;
 
 	public void setDifficulty(String difficulty) {
 	    selectedDifficulty = difficulty;
@@ -47,9 +48,9 @@ public class MainApplication extends GraphicsProgram {
 		addKeyListeners();
 		addMouseListeners();
 		
-		SoundPlayer sp = new SoundPlayer();
+		soundPlayer = new SoundPlayer();
 		// Assuming file is in project root/resources/background.wav
-		sp.playSound("/sounds/18e8-7422-4adc-a195-041a574655e1.wav");
+		soundPlayer.playSound("/sounds/18e8-7422-4adc-a195-041a574655e1.wav");
 
 	}
  
@@ -108,6 +109,21 @@ public class MainApplication extends GraphicsProgram {
 	    gamePane.startNewGame();
 	    switchToScreen(gamePane);
 	}
+	
+//	public boolean isMusicOn() {
+//		return soundPlayer != null && soundPlayer.isPlaying();
+//	}
+//	
+//	public void setMusicOn(boolean on) {
+//		 if (soundPlayer == null) return;
+//		    if (on) {
+//		        if (!soundPlayer.isPlaying()) {
+//		            soundPlayer.playSound("/sounds/18e8-7422-4adc-a195-041a574655e1.wav");
+//		        }
+//		    } else {
+//		        soundPlayer.stopSound();
+//		    }
+//	}
 	
 	public void switchToGameOverScreen(int score, int lives, String cause) {
 		gameOverPane.setResults(score, lives, cause);
