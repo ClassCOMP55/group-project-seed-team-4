@@ -1,194 +1,367 @@
 import java.util.*;
 import javax.swing.Timer;
-import java.awt.event.*;
+import java.awt.*;
 import acm.graphics.*;
-import java.awt.Color;
 
 public class PacketSpawner {
 
+    private static final int PACKET_SIZE = 64;
+
     private GamePane gamePane;
-    private Timer spawnTimer;
-    private int spawnDelay;
-    private double baseEnemySpeed;
-    private int maxEnemies;
-    private ArrayList<GObject> enemies = new ArrayList<>();
-    private Map<GObject, PacketType> typeMap = new HashMap<>();
-    private boolean phishingActive = false;
-    private Timer phishingTimer;
-    private int goodPacketClicks = 0;
+    private Timer    spawnTimer;
+    private double   baseEnemySpeed;
 
-    public PacketSpawner(GamePane gamePane, int spawnDelay, double baseEnemySpeed, int maxEnemies) {
-        this.gamePane = gamePane;
-        this.spawnDelay = spawnDelay;
+    private final ArrayList<GObject>       enemies = new ArrayList<>();
+    private final Map<GObject, PacketType> typeMap = new HashMap<>();
+    private final Map<GObject, GObject>    phishReal   = new HashMap<>();
+    private final Map<GObject, Timer>      phishTimers = new HashMap<>();
+
+    public PacketSpawner(GamePane gamePane, int spawnDelay,
+                         double baseEnemySpeed, int maxEnemies) {
+        this.gamePane       = gamePane;
         this.baseEnemySpeed = baseEnemySpeed;
-        this.maxEnemies = maxEnemies;
-        setupTimer();
+
+        spawnTimer = new Timer(spawnDelay, e -> {
+            try {
+                spawnEnemy();
+            } catch (Exception ex) {
+                System.err.println("PacketSpawner.spawnEnemy error: " + ex.getMessage());
+            }
+        });
+        spawnTimer.setRepeats(true);
     }
 
-    private void setupTimer() {
-      spawnTimer = new Timer(spawnDelay, e -> spawnEnemy());
-    }
-
-    public void start() {
-        spawnTimer.start();
-    }
+    public void start() { spawnTimer.start(); }
 
     public void stop() {
         spawnTimer.stop();
+        for (Timer t : new ArrayList<>(phishTimers.values())) t.stop();
+        phishTimers.clear();
+        phishReal.clear();
+        enemies.clear();
+        typeMap.clear();
     }
-    //------HERE BOY------GOOD FIGHT---
-    private PacketType randomPacketTypeByDifficulty() {
-    	double r = Math.random();
-    	if(r < 0.40) return PacketType.GOOD;
-    	if(r < 0.60) return PacketType.PHISHING;
-    	if(r < 0.75) return PacketType.MALWARE;
-    	if(r < 0.90) return PacketType.DDOS;
-    	return PacketType.SPOOF;
+
+    private PacketType randomType() {
+        double r = Math.random();
+        if (r < 0.20) return PacketType.GOOD;
+        if (r < 0.35) return PacketType.DATA_BURST;
+        if (r < 0.50) return PacketType.VIRUS;
+        if (r < 0.63) return PacketType.TROJAN;
+        if (r < 0.74) return PacketType.DDOS;
+        if (r < 0.87) return PacketType.PHISHING;
+        return PacketType.RANSOMWARE;
     }
 
     private void spawnEnemy() {
-        if (enemies.size() >= maxEnemies) return;
+        double x = Math.random() * (MainApplication.WINDOW_WIDTH - PACKET_SIZE);
 
-        double x = Math.random() * (MainApplication.WINDOW_WIDTH - 40);
-        double y = 0;
+        PacketType type = randomType();
 
-        PacketType type = randomPacketTypeByDifficulty();
-
-        GRect enemy = new GRect(x, y, 40, 40);
-        enemy.setFilled(true);
-
-        // make phishing and spoof look similar to good (cyan-ish)
-        if (type == PacketType.PHISHING || type == PacketType.SPOOF) {
-            Color cyanish = Color.CYAN.darker();
-            enemy.setColor(cyanish);
-            enemy.setFillColor(cyanish);
+        if (type == PacketType.PHISHING) {
+            spawnPhishing(x);
         } else {
-            enemy.setColor(type.getColor());
-            enemy.setFillColor(type.getColor());
+            GObject obj = makeSprite(type.getNormalSprite(), x, -PACKET_SIZE);
+            enemies.add(obj);
+            typeMap.put(obj, type);
+            gamePane.addEnemy(obj);
         }
+    }
 
-        enemies.add(enemy);
-        typeMap.put(enemy, type);
-        gamePane.addEnemy(enemy);
+    private void spawnPhishing(double x) {
+        String disguiseSprite = Math.random() < 0.5
+            ? PacketType.GOOD.getNormalSprite()
+            : PacketType.DATA_BURST.getNormalSprite();
 
-        enemy.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                handleClickOnPacket(enemy);
+        GObject disguise = makeSprite(disguiseSprite, x, -PACKET_SIZE);
+        GObject real     = makeSprite(PacketType.PHISHING.getNormalSprite(), x, -PACKET_SIZE);
+        setVisible(real, false);
+
+        enemies.add(disguise);
+        typeMap.put(disguise, PacketType.PHISHING);
+        phishReal.put(disguise, real);
+
+        gamePane.addEnemy(disguise);
+        gamePane.addEnemy(real);
+
+        Timer flash = new Timer(900, null);
+        flash.addActionListener(e -> {
+            try {
+                if (!enemies.contains(disguise)) { flash.stop(); return; }
+                setVisible(disguise, false);
+                setVisible(real, true);
+                Timer revert = new Timer(300, ev -> {
+                    try {
+                        if (!enemies.contains(disguise)) return;
+                        setVisible(real, false);
+                        setVisible(disguise, true);
+                    } catch (Exception ex) {
+                        System.err.println("Phishing revert error: " + ex.getMessage());
+                    }
+                });
+                revert.setRepeats(false);
+                revert.start();
+            } catch (Exception ex) {
+                System.err.println("Phishing flash error: " + ex.getMessage());
             }
         });
+        flash.setRepeats(true);
+        flash.start();
+        phishTimers.put(disguise, flash);
     }
 
-//        GImage benemy = new GImage("C:/Users/adami/git/group-project-seed-team-4/src/Images/VirusPacket.png", x, y);
-//        benemy.setSize(40, 40);
-//
-//        enemies.add(benemy);
-//        gamePane.addEnemy(benemy);
-        
-       
-
-    //-----HERE GOOD FIGHT BOY!-------
-    private void handleClickOnPacket(GObject obj) {
-    	PacketType type = typeMap.get(obj);
-    	if(type == null) return;
-    	
-    	removeEnemy(obj);
-    	
-    	if(type == PacketType.GOOD) {
-    		gamePane.updateScore(type.getPoints());
-    		goodPacketClicks++;
-    		if(goodPacketClicks == 10) {
-    			gamePane.addLife(1);
-    		}
-    		else if (goodPacketClicks == 25) {
-    			gamePane.grantTemporaryAbility(5); //gives an ability for 5s
-    		}
-    	}
-    	else if (type == PacketType.PHISHING) {
-            gamePane.updateScore(type.getPoints());
-            triggerPhishingBurst();
-        } else if (type == PacketType.MALWARE) {
-            gamePane.updateScore(type.getPoints());
-            // Example: malware deals damage if reaches bottom. On click it's destroyed as above.
-        } else if (type == PacketType.DDOS) {
-            gamePane.updateScore(type.getPoints());
-            // DDOS clicked -> destroyed; if not clicked and reaches bottom -> disable skills (handled on reach-bottom)
-        } else if (type == PacketType.SPOOF) {
-            // clicking a Spoof steals life/ability
-            if (!gamePane.stealAbilityOrLife()) {
-                // fallback: steal life if ability wasn't available
-                gamePane.loseLife();
-            }
-        }
-
-    }
-    
-    private void triggerPhishingBurst() {
-        if (phishingTimer != null && phishingTimer.isRunning()) {
-            phishingTimer.stop();
-        }
-        phishingActive = true;
-
-        // reduce spawnDelay to double spawn rate (i.e., spawnDelay/2)
-        int oldDelay = spawnTimer.getDelay();
-        spawnTimer.setDelay(Math.max(50, oldDelay / 2));
-
-        phishingTimer = new Timer(15000, e -> {
-            phishingActive = false;
-            spawnTimer.setDelay(oldDelay);
-            phishingTimer.stop();
-        });
-        phishingTimer.setRepeats(false);
-        phishingTimer.start();
-    }
-
-    
     public void updateEnemies() {
-        ArrayList<GObject> toRemove = new ArrayList<>();
+        try {
+            for (GObject obj : new ArrayList<>(enemies)) {
+                PacketType type = typeMap.get(obj);
+                if (type == null) continue;
 
-        for (GObject enemy : new ArrayList<>(enemies)) {
-            PacketType type = typeMap.get(enemy);
-            double speedMult = (type != null) ? type.getBaseSpeedMult() : 1.0;
-            double dy = baseEnemySpeed * speedMult;
-            enemy.move(0, dy);
+                double speed = baseEnemySpeed * type.getBaseSpeedMult();
+                obj.move(0, speed);
 
-            if (enemy.getY() > MainApplication.WINDOW_HEIGHT) {
-                // reached bottom: apply consequences based on type
-                toRemove.add(enemy);
-                gamePane.removeEnemy(enemy);
-                typeMap.remove(enemy);
-                enemies.remove(enemy);
+                GObject real = phishReal.get(obj);
+                if (real != null) real.move(0, speed);
 
-                if (type == PacketType.DDOS) {
-                    // DDOS reaching bottom disables skills for 20s
-                    gamePane.disableSkillsTemporarily(20000);
-                } else if (type == PacketType.SPOOF) {
-                    // Spoof reaching bottom steals life or ability
-                    if (!gamePane.stealAbilityOrLife()) gamePane.loseLife();
-                } else {
-                    // default: lose life equal to damage
-                    gamePane.loseLife();
+                if (obj.getY() > MainApplication.WINDOW_HEIGHT) {
+                    onReachedBottom(obj, type);
                 }
             }
+        } catch (Exception ex) {
+            System.err.println("updateEnemies error: " + ex.getMessage());
         }
-        enemies.removeAll(toRemove);
     }
 
-    
+    private void onReachedBottom(GObject obj, PacketType type) {
+        removePacket(obj);
+
+        if (!type.isBad()) {
+            gamePane.updateScore(type.getPoints());
+            gamePane.onFriendlyPassedThrough();
+        } else {
+            switch (type) {
+                case VIRUS:
+                case TROJAN:
+                case PHISHING:
+                    gamePane.loseLife();
+                    break;
+                case DDOS:
+                    gamePane.triggerDDoS();
+                    break;
+                case RANSOMWARE:
+                    gamePane.deductPoints(type.getRansomPenalty());
+                    break;
+                default:
+                    gamePane.loseLife();
+                    break;
+            }
+
+            if (type != PacketType.DDOS) {
+                gamePane.onMaliciousBreached();
+            }
+        }
+    }
+
     public boolean isEnemy(GObject obj) {
-        return enemies.contains(obj);
+        if (enemies.contains(obj)) return true;
+        return phishReal.containsValue(obj);
+    }
+
+    public void destroyEnemyAt(int mx, int my) {
+        for (GObject obj : new ArrayList<>(enemies)) {
+            double ex = obj.getX(), ey = obj.getY();
+            if (mx >= ex && mx <= ex + PACKET_SIZE && my >= ey && my <= ey + PACKET_SIZE) {
+                destroyEnemy(obj);
+                return;
+            }
+        }
+
+        for (GObject real : new ArrayList<>(phishReal.values())) {
+            double ex = real.getX(), ey = real.getY();
+            if (mx >= ex && mx <= ex + PACKET_SIZE && my >= ey && my <= ey + PACKET_SIZE) {
+                destroyEnemy(real);
+                return;
+            }
+        }
     }
 
     public void destroyEnemy(GObject obj) {
-        if (enemies.contains(obj)) {
-            removeEnemy(obj);
-            PacketType type = typeMap.get(obj);
-            if (type != null) gamePane.updateScore(type.getPoints());
+        try {
+            GObject key = resolveKey(obj);
+            if (key == null || !enemies.contains(key)) return;
+
+            PacketType type = typeMap.get(key);
+            double x = key.getX();
+            double y = key.getY();
+
+            removePacket(key);
+
+            if (type == null) return;
+
+            if (!type.isBad()) {
+                gamePane.loseLife();
+                gamePane.onFriendlyDestroyed();
+            } else {
+                gamePane.updateScore(type.getPoints());
+                gamePane.onPacketDestroyed();
+            }
+
+            showDestroyed(type.getDestroyedSprite(), x, y, type);
+        } catch (Exception ex) {
+            System.err.println("destroyEnemy error: " + ex.getMessage());
         }
     }
 
-    private void removeEnemy(GObject obj) {
-        enemies.remove(obj);
-        typeMap.remove(obj);
-        gamePane.removeEnemy(obj);
+    private GObject resolveKey(GObject obj) {
+        if (enemies.contains(obj)) return obj;
+        for (Map.Entry<GObject, GObject> e : phishReal.entrySet()) {
+            if (e.getValue() == obj) return e.getKey();
+        }
+        return null;
+    }
+
+    private void removePacket(GObject key) {
+        Timer t = phishTimers.remove(key);
+        if (t != null) t.stop();
+
+        GObject real = phishReal.remove(key);
+        if (real != null) {
+            setVisible(real, true);
+            gamePane.removeEnemy(real);
+        }
+
+        enemies.remove(key);
+        typeMap.remove(key);
+        gamePane.removeEnemy(key);
+    }
+
+    private void showDestroyed(String sprite, double x, double y, PacketType type) {
+        try {
+            GObject destroyed = makeSprite(sprite, x, y);
+            gamePane.addTemporary(destroyed);
+            spawnParticles(x + PACKET_SIZE / 2.0, y + PACKET_SIZE / 2.0, particleColor(type));
+
+            Timer cleanup = new Timer(400, e -> gamePane.removeTemporary(destroyed));
+            cleanup.setRepeats(false);
+            cleanup.start();
+        } catch (Exception ex) {
+            System.err.println("showDestroyed error: " + ex.getMessage());
+        }
+    }
+
+    private Color particleColor(PacketType type) {
+        if (type == null) return new Color(0, 200, 230);
+        switch (type) {
+            case GOOD:       return new Color( 80, 180, 255);
+            case DATA_BURST: return new Color(255, 220,   0);
+            case VIRUS:
+            case TROJAN:
+            case DDOS:       return new Color(255,  50,  50); 
+            case PHISHING:
+            case RANSOMWARE: return new Color(180, 100, 255);
+            default:         return new Color(0, 200, 230);
+        }
+    }
+
+    private void spawnParticles(double cx, double cy, Color baseColor) {
+        Random rng = new Random();
+        int count = 20;
+
+        double[] px    = new double[count]; 
+        double[] py    = new double[count]; 
+        double[] vx    = new double[count]; 
+        double[] vy    = new double[count]; 
+        double[] size  = new double[count]; 
+        double[] decay = new double[count]; 
+
+        ArrayList<GOval> ovals = new ArrayList<>();
+
+        for (int i = 0; i < count; i++) {
+            double angle = rng.nextDouble() * 2 * Math.PI;
+            double speed = 3.0 + rng.nextDouble() * 9.0;
+            vx[i] = Math.cos(angle) * speed;
+            vy[i] = Math.sin(angle) * speed - 1.5;
+
+            double s = 4.0 + rng.nextDouble() * 10.0;
+            size[i] = s;
+
+            decay[i] = 0.3 + rng.nextDouble() * 0.5;
+
+            px[i] = cx - s / 2;
+            py[i] = cy - s / 2;
+
+            Color c = rng.nextDouble() < 0.35
+                ? blend(baseColor, Color.WHITE, 0.6f)
+                : baseColor;
+
+            GOval oval = new GOval(px[i], py[i], size[i], size[i]);
+            oval.setFilled(true);
+            oval.setFillColor(c);
+            oval.setColor(c);
+            gamePane.addTemporary(oval);
+            ovals.add(oval);
+        }
+
+        int[] tick = {0};
+        int maxTicks = 28; 
+        double gravity = 0.4;
+
+        Timer anim = new Timer(20, null);
+        anim.addActionListener(e -> {
+            tick[0]++;
+            boolean anyAlive = false;
+
+            for (int i = 0; i < count; i++) {
+                if (size[i] <= 0) continue;
+                anyAlive = true;
+
+                vy[i] += gravity;
+
+                px[i] += vx[i];
+                py[i] += vy[i];
+
+                vx[i] *= 0.92;
+                vy[i] *= 0.92;
+
+                size[i] = Math.max(0, size[i] - decay[i]);
+
+                GOval oval = ovals.get(i);
+                oval.setLocation(px[i], py[i]);
+                oval.setSize(size[i], size[i]);
+            }
+
+            if (!anyAlive || tick[0] >= maxTicks) {
+                anim.stop();
+                for (GOval oval : ovals) gamePane.removeTemporary(oval);
+            }
+        });
+        anim.start();
+    }
+
+    private Color blend(Color a, Color b, float t) {
+        return new Color(
+            (int)(a.getRed()   + (b.getRed()   - a.getRed())   * t),
+            (int)(a.getGreen() + (b.getGreen() - a.getGreen()) * t),
+            (int)(a.getBlue()  + (b.getBlue()  - a.getBlue())  * t)
+        );
+    }
+
+    private GObject makeSprite(String filename, double x, double y) {
+        try {
+            GImage img = new GImage(filename, x, y);
+            img.setSize(PACKET_SIZE, PACKET_SIZE);
+            return img;
+        } catch (Exception ex) {
+            System.err.println("Missing sprite: " + filename + " — using fallback rect");
+            GRect rect = new GRect(x, y, PACKET_SIZE, PACKET_SIZE);
+            rect.setFilled(true);
+            rect.setFillColor(Color.MAGENTA);
+            rect.setColor(Color.WHITE);
+            return rect;
+        }
+    }
+
+    private void setVisible(GObject obj, boolean visible) {
+        if (obj instanceof GImage) ((GImage) obj).setVisible(visible);
+        else obj.setColor(visible ? Color.WHITE : new Color(0,0,0,0));
     }
 }

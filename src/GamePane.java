@@ -1,287 +1,360 @@
 import java.awt.*;
+import java.util.ArrayList;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import javax.swing.Timer;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import acm.graphics.*;
 
 public class GamePane extends GraphicsPane {
 
-    private static final Color BG = new Color(0, 1, 4);
-    private static final Color GRID_COLOR = new Color(8, 28, 45);
-    private static final Color SCORE_COLOR = new Color(57, 255, 100);
-    private static final Color LIVES_COLOR = new Color(255, 80, 80);
+    private static final Color BG          = new Color(  0,   1,   4);
+    private static final Color GRID_COLOR  = new Color(  8,  28,  45);
+    private static final Color SCORE_COLOR = new Color( 57, 255, 100);
+    private static final Color LIVES_COLOR = new Color(255,  80,  80);
 
     private Font fScore;
+    private Font fDDoS;
 
     private GLabel scoreLabel;
     private GLabel livesLabel;
 
-    private int score;
+    private GRect  ddosOverlay;
+    private GLabel ddosLabel;
+    private boolean ddosActive = false;
+    private Timer   ddosTimer;
+
+    private Timer   shakeTimer;
+    private int     shakeTick;
+    private int     shakeDuration;    
+    private double  shakeMagnitude; 
+    private double  shakeOffsetX = 0;
+    private double  shakeOffsetY = 0;
+    private final java.util.Random rng = new java.util.Random();
+
+    private GRect  flashRect;
+    private Timer  flashTimer;
+    private int    flashTick;
+    private int    flashDuration;
+    private Color  flashColor;
+
+    private int    score;
     private double enemySpeed;
-    private int spawnDelay;
-    private int maxEnemies;
-    private int lives;
+    private int    spawnDelay;
+    private int    maxEnemies;
+    private int    lives;
 
     private PacketSpawner spawner;
-    private Timer gameLoop;
-    
-    private int goodPacketClicks = 0;
-    private int abilitiesCount = 0;
-    private boolean skillsEnabled = true;
-    private Timer skillDisableTimer;
-    private Timer abilityExpireTimer;
+    private Timer         gameLoop;
 
     public GamePane(MainApplication mainScreen) {
         super(mainScreen);
-        fScore = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 28f);
-        score = 0;
+        fScore = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 48f);
+        fDDoS  = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 72f);
     }
 
     public void startNewGame() {
-        score = 0;
-        goodPacketClicks = 0;
-        abilitiesCount = 0;
-        skillsEnabled = true;
-        if (skillDisableTimer != null && skillDisableTimer.isRunning()) skillDisableTimer.stop();
-        if (abilityExpireTimer != null && abilityExpireTimer.isRunning()) abilityExpireTimer.stop();
+        hardStop();
+        resetShake();
 
-        String difficulty = mainScreen.getDifficulty();
+        score      = 0;
+        ddosActive = false;
+        ddosOverlay = null;
+        ddosLabel   = null;
 
-        if (difficulty.equals("NOOB")) {
-            lives = 5;
-            enemySpeed = 1.0;
-            spawnDelay = 2000;
-            maxEnemies = 3;
-        } else if (difficulty.equals("PRO")) {
-            lives = 3;
-            enemySpeed = 2.0;
-            spawnDelay = 1200;
-            maxEnemies = 5;
+        String diff = mainScreen.getDifficulty();
+        if (diff.equals("NOOB")) {
+            lives = 5; enemySpeed = 1.5; spawnDelay = 2000; maxEnemies = 4;
+        } else if (diff.equals("PRO")) {
+            lives = 3; enemySpeed = 2.5; spawnDelay = 1200; maxEnemies = 6;
         } else {
-            lives = 2;
-            enemySpeed = 3.5;
-            spawnDelay = 700;
-            maxEnemies = 8;
+            lives = 2; enemySpeed = 4.0; spawnDelay = 700;  maxEnemies = 9;
         }
 
-        if (spawner != null) {
-            spawner.stop();
-        }
-
-        if (gameLoop != null) {
-            gameLoop.stop();
-        }
-
-        spawner = new PacketSpawner(this, spawnDelay, enemySpeed, maxEnemies);
-
-        gameLoop = new Timer(20, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (spawner != null) {
-                    spawner.updateEnemies();
-                }
-            }
-        });
-    }
-
-    public void addEnemy(GObject enemy) {
-        addContent(enemy);
-    }
-
-    public void removeEnemy(GObject enemy) {
-        mainScreen.remove(enemy);
-        contents.remove(enemy);
+        spawner  = new PacketSpawner(this, spawnDelay, enemySpeed, maxEnemies);
+        gameLoop = new Timer(16, e -> { if (spawner != null) spawner.updateEnemies(); });
     }
 
     @Override
     public void showContent() {
+        mainScreen.setCanvasBackground(new Color(180, 180, 180));
         drawBackground();
         drawGrid();
-        drawScore();
-        drawLives();
-
-        if (spawner != null) {
-            spawner.start();
-        }
-
-        if (gameLoop != null) {
-            gameLoop.start();
-        }
+        drawHUD();
+        if (spawner  != null) spawner.start();
+        if (gameLoop != null) gameLoop.start();
     }
 
     @Override
     public void hideContent() {
-        if (spawner != null) {
-            spawner.stop();
-        }
-
-        if (gameLoop != null) {
-            gameLoop.stop();
-        }
-
+        mainScreen.setCanvasBackground(Color.WHITE);
+        hardStop();
+        resetShake();
         super.hideContent();
     }
-    
-    private void addContent(GObject o) {
-        contents.add(o);
-        mainScreen.add(o);
+
+    private void hardStop() {
+        if (gameLoop  != null) gameLoop.stop();
+        if (spawner   != null) spawner.stop();
+        if (ddosTimer != null) { ddosTimer.stop(); ddosTimer = null; }
+        stopShake();
+        if (flashTimer != null){ flashTimer.stop(); flashTimer = null; }
     }
 
     private void drawBackground() {
-        GRect bg = new GRect(0, 0, MainApplication.WINDOW_WIDTH, MainApplication.WINDOW_HEIGHT);
-        bg.setFilled(true);
-        bg.setFillColor(BG);
-        bg.setColor(BG);
-        addContent(bg);
+        int rw = (int) mainScreen.getWidth();
+        int rh = (int) mainScreen.getHeight();
+        GRect bg = new GRect(0, 0, rw, rh);
+        bg.setFilled(true); bg.setFillColor(BG); bg.setColor(BG);
+        add(bg);
     }
 
     private void drawGrid() {
-        int s = 60;
-
-        for (int x = 0; x <= MainApplication.WINDOW_WIDTH; x += s) {
-            GLine l = new GLine(x, 0, x, MainApplication.WINDOW_HEIGHT);
-            l.setColor(GRID_COLOR);
-            addContent(l);
-        }
-
-        for (int y = 0; y <= MainApplication.WINDOW_HEIGHT; y += s) {
-            GLine l = new GLine(0, y, MainApplication.WINDOW_WIDTH, y);
-            l.setColor(GRID_COLOR);
-            addContent(l);
-        }
+        int s  = 60;
+        int rw = (int) mainScreen.getWidth();
+        int rh = (int) mainScreen.getHeight();
+        for (int x = 0; x <= rw; x += s) { GLine l = new GLine(x,0,x,rh); l.setColor(GRID_COLOR); add(l); }
+        for (int y = 0; y <= rh; y += s) { GLine l = new GLine(0,y,rw,y); l.setColor(GRID_COLOR); add(l); }
     }
 
-    private void drawScore() {
-        scoreLabel = new GLabel("SCORE: " + score, 20, 40);
-        scoreLabel.setFont(fScore);
-        scoreLabel.setColor(SCORE_COLOR);
-        addContent(scoreLabel);
+    private void drawHUD() {
+        scoreLabel = new GLabel("SCORE: " + score, 20, 60);
+        scoreLabel.setFont(fScore); scoreLabel.setColor(SCORE_COLOR);
+        add(scoreLabel);
+
+        livesLabel = new GLabel("LIVES: " + lives, 20, 115);
+        livesLabel.setFont(fScore); livesLabel.setColor(LIVES_COLOR);
+        add(livesLabel);
     }
 
-    private void drawLives() {
-        livesLabel = new GLabel("LIVES: " + lives, 20, 80);
-        livesLabel.setFont(fScore);
-        livesLabel.setColor(LIVES_COLOR);
-        addContent(livesLabel);
+    public void addEnemy(GObject enemy)    { add(enemy);    }
+    public void removeEnemy(GObject enemy) { remove(enemy); }
+
+    public void addTemporary(GObject obj) {
+        mainScreen.add(obj);
+        contents.add(obj);
+    }
+
+    public void removeTemporary(GObject obj) {
+        mainScreen.remove(obj);
+        contents.remove(obj);
     }
 
     public void updateScore(int delta) {
         score += delta;
+        if (scoreLabel != null) scoreLabel.setLabel("SCORE: " + score);
+    }
 
-        if (scoreLabel != null) {
-            scoreLabel.setLabel("SCORE: " + score);
-        }
+    public void deductPoints(int amount) {
+        score = Math.max(0, score - amount);
+        if (scoreLabel != null) scoreLabel.setLabel("SCORE: " + score);
     }
 
     public void loseLife() {
+        if (lives <= 0) return;
         lives--;
-
-        if (livesLabel != null) {
-            livesLabel.setLabel("LIVES: " + lives);
-        }
-
-        if (lives <= 0) {
-            if (spawner != null) {
-                spawner.stop();
-            }
-
-            if (gameLoop != null) {
-                gameLoop.stop();
-            }
-
-            mainScreen.switchToGameOverScreen(score, lives, "FIREWALL BREACHED");
-        }
+        if (livesLabel != null) livesLabel.setLabel("LIVES: " + lives);
+        if (lives <= 0) endGame();
     }
-    
+
     public void addLife(int n) {
-    	lives += n;
-    	if (livesLabel != null) {
-    		livesLabel.setLabel("LIVES: " + lives);
-    	}
+        lives += n;
+        if (livesLabel != null) livesLabel.setLabel("LIVES: " + lives);
     }
-    
-    public void grantTemporaryAbility(int seconds) {
-    	abilitiesCount++;
-    	if (abilityExpireTimer != null && abilityExpireTimer.isRunning()) {
-    		abilityExpireTimer.stop();
-    	}
-    	abilityExpireTimer = new Timer(seconds * 1000, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (abilitiesCount > 0) abilitiesCount--;
-                abilityExpireTimer.stop();
+
+    private void endGame() {
+        hardStop();
+        resetShake();
+        super.hideContent();
+        mainScreen.switchToGameOverScreen(score, lives, "FIREWALL BREACHED");
+    }
+
+    public void shake(double magnitude, int durationMs) {
+        stopShake();
+
+        shakeMagnitude = magnitude;
+        shakeDuration  = Math.max(1, durationMs / 16);
+        shakeTick      = 0;
+
+        shakeTimer = new Timer(16, e -> {
+            shakeTick++;
+
+            if (shakeTick >= shakeDuration) {
+                stopShake();
+                return;
+            }
+
+            double prevX = shakeOffsetX;
+            double prevY = shakeOffsetY;
+
+            double progress = (double) shakeTick / shakeDuration;
+            double decay    = Math.pow(1.0 - progress, 1.8);
+            double mag      = shakeMagnitude * decay;
+            double angle    = rng.nextDouble() * 2 * Math.PI;
+
+            shakeOffsetX = Math.cos(angle) * mag;
+            shakeOffsetY = Math.sin(angle) * mag;
+
+            double dx = shakeOffsetX - prevX;
+            double dy = shakeOffsetY - prevY;
+            for (GObject obj : new ArrayList<>(contents)) {
+                obj.move(dx, dy);
             }
         });
-        abilityExpireTimer.setRepeats(false);
-        abilityExpireTimer.start();
+        shakeTimer.start();
     }
-    
-    public void disableSkillsTemporarily(int milliseconds) {
-    	skillsEnabled = false;
-    	if (skillDisableTimer != null && skillDisableTimer.isRunning()) {
-    		skillDisableTimer.stop();
-    	}
-    	skillDisableTimer = new Timer(milliseconds, new ActionListener() {
-    		public void actionPerformed(ActionEvent e) {
-    			skillsEnabled = true;
-    			skillDisableTimer.stop();
-    		}
-    	});
-    	skillDisableTimer.setRepeats(false);
-    	skillDisableTimer.start();
+
+    private void stopShake() {
+        if (shakeTimer != null) {
+            shakeTimer.stop();
+            shakeTimer = null;
+        }
+
+        if (shakeOffsetX != 0 || shakeOffsetY != 0) {
+            for (GObject obj : new ArrayList<>(contents)) {
+                obj.move(-shakeOffsetX, -shakeOffsetY);
+            }
+            shakeOffsetX  = 0;
+            shakeOffsetY  = 0;
+        }
+        shakeMagnitude = 0;
     }
-    
-    public boolean stealAbilityOrLife() {
-    	if (abilitiesCount > 0) {
-    		abilitiesCount--;
-    		return true;
-    	}
-    	return false;
+
+    private void resetShake() {
+        stopShake();
     }
-    
-    public boolean areSkillsEnabled() {
-    	return skillsEnabled;
+
+    public void flash(Color color, int durationMs) {
+        if (flashTimer != null && flashTimer.isRunning()) {
+            flashTimer.stop();
+            if (flashRect != null) {
+                mainScreen.remove(flashRect);
+                contents.remove(flashRect);
+                flashRect = null;
+            }
+        }
+
+        int rw = (int) mainScreen.getWidth();
+        int rh = (int) mainScreen.getHeight();
+
+        flashRect = new GRect(0, 0, rw, rh);
+        flashRect.setFilled(true);
+        flashRect.setColor(color);
+        flashRect.setFillColor(color);
+        mainScreen.add(flashRect);
+        contents.add(flashRect);
+
+        flashColor    = color;
+        flashDuration = durationMs / 16;
+        flashTick     = 0;
+
+        flashTimer = new Timer(16, e -> {
+            flashTick++;
+            double progress = (double) flashTick / flashDuration;
+
+            if (progress >= 1.0) {
+                flashTimer.stop();
+                flashTimer = null;
+                mainScreen.remove(flashRect);
+                contents.remove(flashRect);
+                flashRect = null;
+                return;
+            }
+
+            int alpha = (int)(flashColor.getAlpha() * (1.0 - progress));
+            Color faded = new Color(
+                flashColor.getRed(),
+                flashColor.getGreen(),
+                flashColor.getBlue(),
+                alpha
+            );
+            flashRect.setFillColor(faded);
+            flashRect.setColor(faded);
+        });
+        flashTimer.start();
     }
-    
-    public int getAbilityCount() {
-    	return abilitiesCount;
+
+    public void playSfx(String filename) {
+        mainScreen.playSfx(filename);
     }
-    
+
+    public void onPacketDestroyed() {
+        shake(12, 220);
+        playSfx("destroy.wav");
+    }
+
+    public void onFriendlyDestroyed() {
+        shake(12, 220);
+        flash(new Color(255, 30, 30, 150), 400);
+        playSfx("friendly_destroyed.wav");
+    }
+
+    public void onFriendlyPassedThrough() {
+        shake(5, 150);
+        flash(new Color(57, 255, 100, 20), 400); // green
+    }
+
+    public void onMaliciousBreached() {
+        shake(28, 350);
+        flash(new Color(255, 30, 30, 180), 500);  // red
+    }
+
+    public void triggerDDoS() {
+        if (ddosActive) return;
+        ddosActive = true;
+
+        onMaliciousBreached();
+
+        int rw = (int) mainScreen.getWidth();
+        int rh = (int) mainScreen.getHeight();
+
+        ddosOverlay = new GRect(0, 0, rw, rh);
+        ddosOverlay.setFilled(true);
+        ddosOverlay.setFillColor(new Color(180, 0, 0, 160));
+        ddosOverlay.setColor(new Color(180, 0, 0, 0));
+        mainScreen.add(ddosOverlay);
+        contents.add(ddosOverlay);
+
+        ddosLabel = new GLabel("YOU HAVE BEEN DDOS'D", 0, 0);
+        ddosLabel.setFont(fDDoS);
+        ddosLabel.setColor(Color.WHITE);
+        ddosLabel.setLocation((rw - ddosLabel.getWidth()) / 2.0, rh / 2.0);
+        mainScreen.add(ddosLabel);
+        contents.add(ddosLabel);
+
+        ddosTimer = new Timer(3000, e -> {
+            ddosActive = false;
+            if (ddosOverlay != null) { mainScreen.remove(ddosOverlay); contents.remove(ddosOverlay); ddosOverlay = null; }
+            if (ddosLabel   != null) { mainScreen.remove(ddosLabel);   contents.remove(ddosLabel);   ddosLabel   = null; }
+            ddosTimer.stop();
+        });
+        ddosTimer.setRepeats(false);
+        ddosTimer.start();
+    }
+
     @Override
     public void mousePressed(MouseEvent e) {
-        GObject clicked = mainScreen.getElementAtLocation(e.getX(), e.getY());
-
-        if (clicked != null && spawner != null && spawner.isEnemy(clicked)) {
+        if (ddosActive) return;
+        int mx = e.getX(), my = e.getY();
+        
+        GObject clicked = mainScreen.getElementAtLocation(mx, my);
+        if (clicked == flashRect || clicked == ddosOverlay || clicked == ddosLabel) {
+            clicked = null;
+        }
+       
+        if (clicked == null) {
+            if (spawner != null) spawner.destroyEnemyAt(mx, my);
+            return;
+        }
+        if (spawner != null && spawner.isEnemy(clicked)) {
             spawner.destroyEnemy(clicked);
         }
     }
 
-    @Override
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent e) {
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        // Add keyboard controls later
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
+    @Override public void mouseReleased(MouseEvent e) {}
+    @Override public void mouseClicked(MouseEvent e)  {}
+    @Override public void mouseDragged(MouseEvent e)  {}
+    @Override public void mouseMoved(MouseEvent e)    {}
+    @Override public void keyPressed(KeyEvent e)      {}
+    @Override public void keyReleased(KeyEvent e)     {}
+    @Override public void keyTyped(KeyEvent e)        {}
 }

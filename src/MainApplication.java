@@ -49,9 +49,6 @@ public class MainApplication extends GraphicsProgram {
 		addMouseListeners();
 		
 		soundPlayer = new SoundPlayer();
-		// Assuming file is in project root/resources/background.wav
-		soundPlayer.playSound("/sounds/18e8-7422-4adc-a195-041a574655e1.wav");
-
 	}
  
 	private void loadFonts() {
@@ -62,7 +59,7 @@ public class MainApplication extends GraphicsProgram {
 			FONT_HACKED = hacked;
 		} catch (Exception e) {
 			System.err.println("Could not load Hacked-KerX.ttf: " + e.getMessage());
-			FONT_HACKED = new Font("Dialog", Font.BOLD, 12); // fallback
+			FONT_HACKED = new Font("Dialog", Font.BOLD, 12);
 		}
 		try {
 			Font ithaca = Font.createFont(Font.TRUETYPE_FONT, new File("Ithaca-LVB75.ttf"));
@@ -70,7 +67,7 @@ public class MainApplication extends GraphicsProgram {
 			FONT_ITHACA = ithaca;
 		} catch (Exception e) {
 			System.err.println("Could not load Ithaca-LVB75.ttf: " + e.getMessage());
-			FONT_ITHACA = new Font("Dialog", Font.PLAIN, 12); // fallback
+			FONT_ITHACA = new Font("Dialog", Font.PLAIN, 12);
 		}
 	}
  
@@ -98,39 +95,62 @@ public class MainApplication extends GraphicsProgram {
 		gameOverPane    = new GameOverPane(this);
  
 		switchToScreen(welcomePane);
+		playMenuMusic();
 	}
  
-	public void switchToWelcomeScreen()     { switchToScreen(welcomePane);     }
+	public void switchToWelcomeScreen()     { switchToScreen(welcomePane); playMenuMusic(); }
 	public void switchToDescriptionScreen() { switchToScreen(descriptionPane); }
-	public void switchToSettingsScreen()    { switchToScreen(settingsPane);    }
-	public void switchToShopScreen()        { switchToScreen(shopPane);        }
-	public void switchToDifficultyScreen()  { switchToScreen(difficultyPane);  }
+	public void switchToSettingsScreen()    { switchToScreen(settingsPane); playMenuMusic(); }
+	public void switchToShopScreen()        { switchToScreen(shopPane); playMenuMusic(); }
+	public void switchToDifficultyScreen()  { switchToScreen(difficultyPane); playMenuMusic(); }
 	public void switchToGameScreen() {
-	    gamePane.startNewGame();
-	    switchToScreen(gamePane);
+		gamePane.startNewGame();
+		switchToScreen(gamePane);
+		playGameMusic();
 	}
 	
+	private static final String MUSIC_MENU = "menu_music.wav";
+	private static final String MUSIC_GAME = "game_music.wav";
+
 	public boolean isMusicOn() {
 		return soundPlayer != null && soundPlayer.isPlaying();
 	}
-	
+
 	public void setMusicOn(boolean on) {
-		 if (soundPlayer == null) return;
-		    if (on) {
-		        if (!soundPlayer.isPlaying()) {
-		            soundPlayer.playSound("/sounds/18e8-7422-4adc-a195-041a574655e1.wav");
-		        }
-		    } else {
-		        soundPlayer.stopSound();
-		    }
+		if (soundPlayer == null) return;
+		if (on) {
+			playMenuMusic();
+		} else {
+			soundPlayer.stopSound();
+		}
 	}
-	
+
+	private void playMenuMusic() {
+		if (soundPlayer != null && !soundPlayer.isPlayingTrack(MUSIC_MENU)) {
+			soundPlayer.playSound(MUSIC_MENU);
+		}
+	}
+
+	private void playGameMusic() {
+		if (soundPlayer != null) soundPlayer.playSound(MUSIC_GAME);
+	}
+
+	private void stopMusic() {
+		if (soundPlayer != null) soundPlayer.stopSound();
+	}
+
+	public void playSfx(String filename) {
+		if (soundPlayer != null) soundPlayer.playSfx(filename);
+	}
+
 	public void switchToGameOverScreen(int score, int lives, String cause) {
+		stopMusic();
 		gameOverPane.setResults(score, lives, cause);
 		switchToScreen(gameOverPane);
 	}
- 
+
 	public void switchToGameOverScreen() {
+		stopMusic();
 		switchToScreen(gameOverPane);
 	}
  
@@ -143,6 +163,26 @@ public class MainApplication extends GraphicsProgram {
  
 	public GObject getElementAtLocation(double x, double y) {
 		return getElementAt(x, y);
+	}
+
+	public void setCanvasBackground(java.awt.Color color) {
+		for (Frame f : Frame.getFrames()) {
+			if (f.isVisible()) {
+				setBackgroundRecursive(f, color);
+				break;
+			}
+		}
+	}
+
+	private void setBackgroundRecursive(java.awt.Container container, java.awt.Color color) {
+		container.setBackground(color);
+		for (int i = 0; i < container.getComponentCount(); i++) {
+			java.awt.Component c = container.getComponent(i);
+			c.setBackground(color);
+			if (c instanceof java.awt.Container) {
+				setBackgroundRecursive((java.awt.Container) c, color);
+			}
+		}
 	}
  
 	public static void main(String[] args) {
@@ -175,4 +215,3 @@ public class MainApplication extends GraphicsProgram {
 	@Override public void keyReleased(KeyEvent e) { if (currentScreen != null) currentScreen.keyReleased(e); }
 	@Override public void keyTyped(KeyEvent e)    { if (currentScreen != null) currentScreen.keyTyped(e);    }
 }
- 
