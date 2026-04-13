@@ -2,6 +2,7 @@ import javax.sound.sampled.*;
 import java.io.File;
 
 public class SoundPlayer {
+	
     private Clip   bgmClip;
     private String currentTrack = "";
 
