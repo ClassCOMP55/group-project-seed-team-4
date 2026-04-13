@@ -20,13 +20,13 @@ public class SettingsPane extends GraphicsPane {
 	private Font fBack;
 	private Font fTicker;
 
-	// Placeholder settings, no functionality yet
 	private static final String[] SETTING_LABELS = {
 		"SOUND EFFECTS",
 		"MUSIC VOLUME",
 		"SHOW HINTS",
 	};
-	private static final String[] SETTING_VALUES = {
+	// default values (MUSIC toggled dynamically)
+	private String[] settingValues = {
 		"ON",
 		"80%",
 		"ON",
@@ -36,6 +36,8 @@ public class SettingsPane extends GraphicsPane {
 	private static final int TOP_Y   = (H - BLOCK_H) / 2;
 
 	private Rectangle backRegion;
+	private Rectangle panelRegion;
+	private GLabel[] valueLabels = new GLabel[SETTING_LABELS.length];
 
 	public SettingsPane(MainApplication mainScreen) {
 		super(mainScreen);
@@ -62,6 +64,7 @@ public class SettingsPane extends GraphicsPane {
 		for (GObject o : contents) mainScreen.remove(o);
 		contents.clear();
 		backRegion = null;
+		panelRegion = null;
 	}
 
 	private void addContent(GObject o) { contents.add(o); mainScreen.add(o); }
@@ -117,16 +120,22 @@ public class SettingsPane extends GraphicsPane {
 		int panelX = (W - panelW) / 2;
 		int panelY = TOP_Y + 120;
 
+		// store panel region so clicks can reference it
+		panelRegion = new Rectangle(panelX, panelY, panelW, panelH);
+
 		GRect panel = new GRect(panelX, panelY, panelW, panelH);
 		panel.setFilled(true); panel.setFillColor(PANEL_BG); panel.setColor(DIM_CYAN);
 		addContent(panel);
+
+		// ensure settingValues first entry matches actual music state
+		settingValues[0] = mainScreen.isMusicOn() ? "ON" : "OFF";
 
 		for (int i = 0; i < SETTING_LABELS.length; i++) {
 			int ry = panelY + 20 + i * (rowH + gap);
 
 			if (i > 0) {
 				GLine div = new GLine(panelX + 20, ry - gap/2, panelX + panelW - 20, ry - gap/2);
-				div.setColor(new Color(0, 60, 80)); 
+				div.setColor(new Color(0, 60, 80));
 				addContent(div);
 			}
 
@@ -138,9 +147,10 @@ public class SettingsPane extends GraphicsPane {
 			lbl.setFont(fItem); lbl.setColor(new Color(160, 200, 215));
 			addContent(lbl);
 
-			GLabel val = new GLabel(SETTING_VALUES[i], 0, ry + rowH/2 + 8);
+			GLabel val = new GLabel(settingValues[i], 0, ry + rowH/2 + 8);
 			val.setFont(fItem); val.setColor(NEON_GREEN);
 			val.setLocation(panelX + panelW - val.getWidth() - 24, ry + rowH/2 + 8);
+			valueLabels[i] = val;
 			addContent(val);
 		}
 	}
@@ -177,8 +187,43 @@ public class SettingsPane extends GraphicsPane {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		int mx = e.getX(), my = e.getY();
+
+		// Back button
 		if (backRegion != null && backRegion.contains(mx, my)) {
 			mainScreen.switchToWelcomeScreen();
+			return;
+		}
+
+		// Click inside panel?
+		if (panelRegion != null && panelRegion.contains(mx, my)) {
+			// Determine which row was clicked
+			int panelX = panelRegion.x;
+			int panelY = panelRegion.y;
+			int panelW = panelRegion.width;
+			int rowH = 70;
+			int gap = 14;
+
+			for (int i = 0; i < SETTING_LABELS.length; i++) {
+				int ry = panelY + 20 + i * (rowH + gap);
+				Rectangle rowRect = new Rectangle(panelX, ry, panelW, rowH);
+				if (rowRect.contains(mx, my)) {
+					handleSettingClick(i);
+					return;
+				}
+			}
 		}
 	}
+
+	private void handleSettingClick(int index) {
+		// Only index 0 (SOUND EFFECTS) is interactive for now
+		if (index == 0) {
+			boolean nowOn = !mainScreen.isMusicOn();
+			mainScreen.setMusicOn(nowOn);
+			settingValues[0] = nowOn ? "ON" : "OFF";
+			if (valueLabels[0] != null) valueLabels[0].setLabel(settingValues[0]);
+		}
+		// Other settings can be added here later
+	}
 }
+
+
