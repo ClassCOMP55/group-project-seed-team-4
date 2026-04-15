@@ -37,6 +37,8 @@ public class GameOverPane extends GraphicsPane {
 	private int    finalScore   = 0;
 	private int    finalLives   = 0;
 	private String causeOfDeath = "FIREWALL BREACHED";
+	
+	private int tokensEarnedThisRun = 0;
  
 	private Rectangle retryRegion;
 	private Rectangle menuRegion;
@@ -57,6 +59,13 @@ public class GameOverPane extends GraphicsPane {
 		this.finalScore   = score;
 		this.finalLives   = lives;
 		this.causeOfDeath = cause;
+		
+		String diff = mainScreen.getDifficulty();
+		double rate = 0.02;
+		if ("PRO".equals(diff)) rate = 0.05;
+		else if ("HACKER".equals(diff)) rate = 0.08;
+
+		this.tokensEarnedThisRun = (int) (score * rate);
 	}
  
 	@Override
@@ -167,6 +176,15 @@ public class GameOverPane extends GraphicsPane {
 		Color  livesCol = finalLives <= 0 ? NEON_RED : NEON_YELLOW;
 		addStatRow(bx+28, by+134, "LIVES  REMAINING", livesStr, livesCol);
 		addStatRow(bx+28, by+182, "STATUS",           "OFFLINE", NEON_RED);
+		addStatRow(bx+28, by+158, "TOKENS  EARNED", String.valueOf(tokensEarnedThisRun), NEON_YELLOW);
+
+		// Show total tokens (read from CurrencyManager)
+		int totalTokens = 0;
+		if (mainScreen.getCurrencyManager() != null) {
+			totalTokens = mainScreen.getCurrencyManager().getTokens();
+		}
+		addStatRow(bx+28, by+216, "TOTAL  TOKENS", String.valueOf(totalTokens), new Color(180, 220, 255));
+
 	}
  
 	private void addStatRow(int x, int y, String label, String value, Color valCol) {
