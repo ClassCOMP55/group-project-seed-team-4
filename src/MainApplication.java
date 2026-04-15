@@ -115,7 +115,9 @@ public class MainApplication extends GraphicsProgram {
 		playGameMusic();
 	}
 	
-	
+	public CurrencyManager getCurrencyManager() {
+		return currencyManager;
+	}
 
     public boolean isMusicOn() {
         return musicOn;

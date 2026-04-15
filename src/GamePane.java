@@ -51,6 +51,7 @@ public class GamePane extends GraphicsPane {
         fScore = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 48f);
         fDDoS  = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 72f);
     }
+    
 
     public void startNewGame() {
         hardStop();
@@ -164,6 +165,12 @@ public class GamePane extends GraphicsPane {
     private void endGame() {
         hardStop();
         resetShake();
+        
+        CurrencyManager cm = mainScreen.getCurrencyManager();
+        if (cm != null) {
+        	cm.addTokensFromScore(score, mainScreen.getDifficulty());
+        }
+        
         super.hideContent();
         mainScreen.switchToGameOverScreen(score, lives, "FIREWALL BREACHED");
     }
