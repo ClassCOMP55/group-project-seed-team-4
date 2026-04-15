@@ -65,9 +65,9 @@ public class GamePane extends GraphicsPane {
         if (diff.equals("NOOB")) {
             lives = 5; enemySpeed = 1.5; spawnDelay = 2000; maxEnemies = 4;
         } else if (diff.equals("PRO")) {
-            lives = 3; enemySpeed = 2.5; spawnDelay = 1200; maxEnemies = 6;
-        } else {
-            lives = 2; enemySpeed = 4.0; spawnDelay = 700;  maxEnemies = 9;
+            lives = 3; enemySpeed = 4.0; spawnDelay = 700;  maxEnemies = 9;
+        } else { 
+            lives = 2; enemySpeed = 5.5; spawnDelay = 400; maxEnemies = 12;
         }
 
         spawner  = new PacketSpawner(this, spawnDelay, enemySpeed, maxEnemies);
