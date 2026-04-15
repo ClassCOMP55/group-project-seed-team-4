@@ -25,7 +25,12 @@ public class MainApplication extends GraphicsProgram {
 	private String selectedDifficulty = "NOOB";
 	private CurrencyManager currencyManager;
 	private SoundPlayer     soundPlayer;
-
+	private boolean musicOn = true;
+	private boolean sfxOn = true;
+	
+	private static final String MUSIC_MENU = "menu_music.wav";
+	private static final String MUSIC_GAME = "game_music.wav";
+	
 	public void setDifficulty(String difficulty) {
 	    selectedDifficulty = difficulty;
 	}
@@ -97,51 +102,67 @@ public class MainApplication extends GraphicsProgram {
 		switchToScreen(welcomePane);
 		playMenuMusic();
 	}
- 
+	
 	public void switchToWelcomeScreen()     { switchToScreen(welcomePane); playMenuMusic(); }
 	public void switchToDescriptionScreen() { switchToScreen(descriptionPane); }
 	public void switchToSettingsScreen()    { switchToScreen(settingsPane); playMenuMusic(); }
 	public void switchToShopScreen()        { switchToScreen(shopPane); playMenuMusic(); }
 	public void switchToDifficultyScreen()  { switchToScreen(difficultyPane); playMenuMusic(); }
+	
 	public void switchToGameScreen() {
 		gamePane.startNewGame();
 		switchToScreen(gamePane);
 		playGameMusic();
 	}
 	
-	private static final String MUSIC_MENU = "menu_music.wav";
-	private static final String MUSIC_GAME = "game_music.wav";
+	
 
-	public boolean isMusicOn() {
-		return soundPlayer != null && soundPlayer.isPlaying();
-	}
+    public boolean isMusicOn() {
+        return musicOn;
+    }
 
-	public void setMusicOn(boolean on) {
-		if (soundPlayer == null) return;
-		if (on) {
-			playMenuMusic();
-		} else {
-			soundPlayer.stopSound();
-		}
-	}
+    public void setMusicOn(boolean on) {
+        musicOn = on;
+        if (!musicOn) {
+            if (soundPlayer != null) soundPlayer.stopSound();
+        } else {
+            // resume appropriate track for current screen
+            if (currentScreen == gamePane) playGameMusic();
+            else playMenuMusic();
+        }
+    }
 
-	private void playMenuMusic() {
-		if (soundPlayer != null && !soundPlayer.isPlayingTrack(MUSIC_MENU)) {
-			soundPlayer.playSound(MUSIC_MENU);
-		}
-	}
+    public boolean isSfxOn() {
+        return sfxOn;
+    }
 
-	private void playGameMusic() {
-		if (soundPlayer != null) soundPlayer.playSound(MUSIC_GAME);
-	}
+    public void setSfxOn(boolean on) {
+        sfxOn = on;
+    }
 
-	private void stopMusic() {
-		if (soundPlayer != null) soundPlayer.stopSound();
-	}
+    private void playMenuMusic() {
+        if (!musicOn) return;
+        if (soundPlayer != null && !soundPlayer.isPlayingTrack(MUSIC_MENU)) {
+            soundPlayer.playSound(MUSIC_MENU);
+        }
+    }
 
-	public void playSfx(String filename) {
-		if (soundPlayer != null) soundPlayer.playSfx(filename);
-	}
+    private void playGameMusic() {
+        if (!musicOn) return;
+        if (soundPlayer != null && !soundPlayer.isPlayingTrack(MUSIC_GAME)) {
+            soundPlayer.playSound(MUSIC_GAME);
+        }
+    }
+
+    private void stopMusic() {
+        if (soundPlayer != null) soundPlayer.stopSound();
+    }
+
+    public void playSfx(String filename) {
+        if (!sfxOn) return;
+        if (soundPlayer != null) soundPlayer.playSfx(filename);
+    }
+
 
 	public void switchToGameOverScreen(int score, int lives, String cause) {
 		stopMusic();

@@ -22,15 +22,10 @@ public class SettingsPane extends GraphicsPane {
 
 	private static final String[] SETTING_LABELS = {
 		"SOUND EFFECTS",
-		"MUSIC VOLUME",
+		"MUSIC",
 		"SHOW HINTS",
 	};
-	// default values (MUSIC toggled dynamically)
-	private String[] settingValues = {
-		"ON",
-		"80%",
-		"ON",
-	};
+	private String[] settingValues = { "ON", "ON", "ON" };
 
 	private static final int BLOCK_H = 616;
 	private static final int TOP_Y   = (H - BLOCK_H) / 2;
@@ -120,15 +115,15 @@ public class SettingsPane extends GraphicsPane {
 		int panelX = (W - panelW) / 2;
 		int panelY = TOP_Y + 120;
 
-		// store panel region so clicks can reference it
 		panelRegion = new Rectangle(panelX, panelY, panelW, panelH);
 
 		GRect panel = new GRect(panelX, panelY, panelW, panelH);
 		panel.setFilled(true); panel.setFillColor(PANEL_BG); panel.setColor(DIM_CYAN);
 		addContent(panel);
 
-		// ensure settingValues first entry matches actual music state
-		settingValues[0] = mainScreen.isMusicOn() ? "ON" : "OFF";
+		// sync values with mainScreen state
+		settingValues[0] = mainScreen.isSfxOn() ? "ON" : "OFF";
+		settingValues[1] = mainScreen.isMusicOn() ? "ON" : "OFF";
 
 		for (int i = 0; i < SETTING_LABELS.length; i++) {
 			int ry = panelY + 20 + i * (rowH + gap);
@@ -196,7 +191,6 @@ public class SettingsPane extends GraphicsPane {
 
 		// Click inside panel?
 		if (panelRegion != null && panelRegion.contains(mx, my)) {
-			// Determine which row was clicked
 			int panelX = panelRegion.x;
 			int panelY = panelRegion.y;
 			int panelW = panelRegion.width;
@@ -215,14 +209,20 @@ public class SettingsPane extends GraphicsPane {
 	}
 
 	private void handleSettingClick(int index) {
-		// Only index 0 (SOUND EFFECTS) is interactive for now
 		if (index == 0) {
-			boolean nowOn = !mainScreen.isMusicOn();
-			mainScreen.setMusicOn(nowOn);
-			settingValues[0] = nowOn ? "ON" : "OFF";
+			// Toggle SFX only
+			boolean now = !mainScreen.isSfxOn();
+			mainScreen.setSfxOn(now);
+			settingValues[0] = now ? "ON" : "OFF";
 			if (valueLabels[0] != null) valueLabels[0].setLabel(settingValues[0]);
+		} else if (index == 1) {
+			// Toggle MUSIC only
+			boolean now = !mainScreen.isMusicOn();
+			mainScreen.setMusicOn(now);
+			settingValues[1] = now ? "ON" : "OFF";
+			if (valueLabels[1] != null) valueLabels[1].setLabel(settingValues[1]);
 		}
-		// Other settings can be added here later
+		// index 2 (hints) left unchanged for now
 	}
 }
 
