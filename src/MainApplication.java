@@ -28,6 +28,9 @@ public class MainApplication extends GraphicsProgram {
 	private boolean musicOn = true;
 	private boolean sfxOn = true;
 	
+	private int exrtraLifePurchases = 0;
+	private int peculiarAudiencePurchases = 0;
+	
 	private static final String MUSIC_MENU = "menu_music.wav";
 	private static final String MUSIC_GAME = "game_music.wav";
 	
