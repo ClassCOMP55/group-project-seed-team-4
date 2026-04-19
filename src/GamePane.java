@@ -111,6 +111,7 @@ public class GamePane extends GraphicsPane {
         if (gameLoop  != null) gameLoop.stop();
         if (spawner   != null) spawner.stop();
         if (ddosTimer != null) { ddosTimer.stop(); ddosTimer = null; }
+        if (peculiarTimer != null) { peculiarTimer.stop(); peculiarTimer = null; peculiarActive = false; }
         stopShake();
         if (flashTimer != null){ flashTimer.stop(); flashTimer = null; }
     }
