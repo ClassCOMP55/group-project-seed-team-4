@@ -237,23 +237,26 @@ public class PacketSpawner {
     
     public void destroyRandomEnemy() {
         try {
-            // choose from current enemies only
-            if (enemies.isEmpty()) return;
-            int idx = (int) (Math.random() * enemies.size());
-            GObject target = enemies.get(idx);
+            // collect only bad enemies
+            ArrayList<GObject> badEnemies = new ArrayList<>();
+            for (GObject e : enemies) {
+                PacketType t = typeMap.get(e);
+                if (t != null && t.isBad()) badEnemies.add(e);
+            }
+            if (badEnemies.isEmpty()) return;
+
+            int idx = (int) (Math.random() * badEnemies.size());
+            GObject target = badEnemies.get(idx);
             if (target != null) {
-                // remove and award score just like a normal player destruction
                 PacketType type = typeMap.get(target);
                 double x = target.getX();
                 double y = target.getY();
                 removePacket(target);
-                if (type != null && type.isBad()) {
-                    gamePane.updateScore(type.getPoints());
-                } else if (type != null && !type.isBad()) {
-                    // destroying a friendly via this effect should not penalize player;
-                    // keep behavior simple: no life deduction when effect destroys friendly.
+                if (type != null) {
+                    // award points only for bad packets
+                    if (type.isBad()) gamePane.updateScore(type.getPoints());
+                    showDestroyed(type.getDestroyedSprite(), x, y, type);
                 }
-                if (type != null) showDestroyed(type.getDestroyedSprite(), x, y, type);
             }
         } catch (Exception ex) {
             System.err.println("destroyRandomEnemy error: " + ex.getMessage());
