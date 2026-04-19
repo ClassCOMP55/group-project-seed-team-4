@@ -140,6 +140,11 @@ public class GamePane extends GraphicsPane {
         livesLabel = new GLabel("LIVES: " + lives, 20, 115);
         livesLabel.setFont(fScore); livesLabel.setColor(LIVES_COLOR);
         add(livesLabel);
+        
+        GLabel hint = new GLabel("Press 'U to use ability", 20, 170);
+        hint.setFont(MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 18f));
+        hint.setColor(new Color(180, 220, 255));
+        add(hint);
     }
 
     public void addEnemy(GObject enemy)    { add(enemy);    }
