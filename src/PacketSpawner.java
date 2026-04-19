@@ -202,7 +202,8 @@ public class PacketSpawner {
                 gamePane.onFriendlyDestroyed();
             } else {
                 gamePane.updateScore(type.getPoints());
-                gamePane.onPacketDestroyed();
+             // Notify gamePane that the player destroyed an enemy (for Peculiar Audience)
+                try { gamePane.onEnemyDestroyed(); } catch (Throwable t) { /* ignore if absent */ }
             }
 
             showDestroyed(type.getDestroyedSprite(), x, y, type);
@@ -233,6 +234,32 @@ public class PacketSpawner {
         typeMap.remove(key);
         gamePane.removeEnemy(key);
     }
+    
+    public void destroyRandomEnemy() {
+        try {
+            // choose from current enemies only
+            if (enemies.isEmpty()) return;
+            int idx = (int) (Math.random() * enemies.size());
+            GObject target = enemies.get(idx);
+            if (target != null) {
+                // remove and award score just like a normal player destruction
+                PacketType type = typeMap.get(target);
+                double x = target.getX();
+                double y = target.getY();
+                removePacket(target);
+                if (type != null && type.isBad()) {
+                    gamePane.updateScore(type.getPoints());
+                } else if (type != null && !type.isBad()) {
+                    // destroying a friendly via this effect should not penalize player;
+                    // keep behavior simple: no life deduction when effect destroys friendly.
+                }
+                if (type != null) showDestroyed(type.getDestroyedSprite(), x, y, type);
+            }
+        } catch (Exception ex) {
+            System.err.println("destroyRandomEnemy error: " + ex.getMessage());
+        }
+    }
+
 
     private void showDestroyed(String sprite, double x, double y, PacketType type) {
         try {

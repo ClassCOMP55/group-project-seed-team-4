@@ -308,7 +308,7 @@ public class GamePane extends GraphicsPane {
     public void onEnemyDestroyed() {
         // trigger the extra random kill if Peculiar Audience active
         if (peculiarActive && spawner != null) {
-            //spawner.destroyRandomEnemy();
+            spawner.destroyRandomEnemy();
         }
         // normal feedback
         onPacketDestroyed();
