@@ -278,6 +278,11 @@ public class ShopPane extends GraphicsPane {
 			boolean ok = currencyManager.spendTokens(cost);
 			if (ok) {
 				// TODO: apply item effect (set flags in mainScreen or elsewhere)
+				if (index == 0) { // EXTRA LIFE
+			        mainScreen.grantExtraLifePurchase();
+			    } else if (index == 1) { // PECULIAR AUDIENCE
+			        mainScreen.grantPeculiarAudiencePurchase();
+			    }
 				JOptionPane.showMessageDialog(null,
 					"Purchased \"" + ITEM_NAMES[index] + "\".",
 					"Purchase Successful",
