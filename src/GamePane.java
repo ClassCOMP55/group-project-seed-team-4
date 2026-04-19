@@ -45,6 +45,9 @@ public class GamePane extends GraphicsPane {
 
     private PacketSpawner spawner;
     private Timer         gameLoop;
+    
+    private boolean peculiarActive = false;
+    private Timer peculiarTimer;
 
     public GamePane(MainApplication mainScreen) {
         super(mainScreen);
@@ -61,6 +64,8 @@ public class GamePane extends GraphicsPane {
         ddosActive = false;
         ddosOverlay = null;
         ddosLabel   = null;
+        peculiarActive = false;
+        if(peculiarTimer != null) {peculiarTimer.stop(); peculiarTimer = null;}
 
         String diff = mainScreen.getDifficulty();
         if (diff.equals("NOOB")) {
@@ -70,6 +75,15 @@ public class GamePane extends GraphicsPane {
         } else { 
             lives = 2; enemySpeed = 5.5; spawnDelay = 400; maxEnemies = 12;
         }
+        
+        int extra = 0;
+        try {
+            extra = mainScreen.consumeExtraLifeForSession();
+        } catch (Throwable t) {
+            // method may be absent; ignore 
+        }
+        lives += extra;
+
 
         spawner  = new PacketSpawner(this, spawnDelay, enemySpeed, maxEnemies);
         gameLoop = new Timer(16, e -> { if (spawner != null) spawner.updateEnemies(); });
