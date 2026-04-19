@@ -47,7 +47,22 @@ public class GamePane extends GraphicsPane {
     private Timer         gameLoop;
     
     private boolean peculiarActive = false;
-    private Timer peculiarTimer;
+    private Timer   peculiarTimer;
+
+    // HUD powerup labels (top-right) — updated dynamically
+    private GLabel networkResetLabel;
+    private GLabel virusScannerLabel;
+    private GLabel systemPurgeLabel;
+
+    // Virus Scanner timer bar
+    private static final int   VS_DURATION_MS = 10000;
+    private static final Color VS_COLOR       = new Color(57, 255, 100);
+    private GRect  vsBarBg;
+    private GRect  vsBarFill;
+    private GLabel vsBarLabel;
+    private Timer  vsBarTimer;
+    private int    vsBarTick;
+    private int    vsBarTotalTicks;
 
     public GamePane(MainApplication mainScreen) {
         super(mainScreen);
@@ -76,13 +91,7 @@ public class GamePane extends GraphicsPane {
             lives = 2; enemySpeed = 5.5; spawnDelay = 400; maxEnemies = 12;
         }
         
-        int extra = 0;
-        try {
-            extra = mainScreen.consumeExtraLifeForSession();
-        } catch (Throwable t) {
-            // method may be absent; ignore 
-        }
-        lives += extra;
+
 
 
         spawner  = new PacketSpawner(this, spawnDelay, enemySpeed, maxEnemies);
@@ -112,6 +121,7 @@ public class GamePane extends GraphicsPane {
         if (spawner   != null) spawner.stop();
         if (ddosTimer != null) { ddosTimer.stop(); ddosTimer = null; }
         if (peculiarTimer != null) { peculiarTimer.stop(); peculiarTimer = null; peculiarActive = false; }
+        clearVirusScannerBar();
         stopShake();
         if (flashTimer != null){ flashTimer.stop(); flashTimer = null; }
     }
@@ -140,11 +150,48 @@ public class GamePane extends GraphicsPane {
         livesLabel = new GLabel("LIVES: " + lives, 20, 115);
         livesLabel.setFont(fScore); livesLabel.setColor(LIVES_COLOR);
         add(livesLabel);
-        
-        GLabel hint = new GLabel("Press 'U to use ability", 20, 170);
-        hint.setFont(MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 18f));
-        hint.setColor(new Color(180, 220, 255));
-        add(hint);
+
+        // Powerup list — top right
+        Font fPower = MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 22f);
+        int rw = (int) mainScreen.getWidth();
+
+        networkResetLabel = new GLabel(powerupLine("1", "NETWORK RESET", mainScreen.getNetworkResetCharges()), 0, 50);
+        networkResetLabel.setFont(fPower);
+        networkResetLabel.setColor(new Color(0, 200, 230));
+        networkResetLabel.setLocation(rw - networkResetLabel.getWidth() - 30, 50);
+        add(networkResetLabel);
+
+        virusScannerLabel = new GLabel(powerupLine("2", "VIRUS SCANNER", mainScreen.getVirusScannerCharges()), 0, 85);
+        virusScannerLabel.setFont(fPower);
+        virusScannerLabel.setColor(new Color(57, 255, 100));
+        virusScannerLabel.setLocation(rw - virusScannerLabel.getWidth() - 30, 85);
+        add(virusScannerLabel);
+
+        systemPurgeLabel = new GLabel(powerupLine("3", "SYSTEM PURGE", mainScreen.getSystemPurgeCharges()), 0, 120);
+        systemPurgeLabel.setFont(fPower);
+        systemPurgeLabel.setColor(new Color(255, 80, 80));
+        systemPurgeLabel.setLocation(rw - systemPurgeLabel.getWidth() - 30, 120);
+        add(systemPurgeLabel);
+    }
+
+    private String powerupLine(String key, String name, int charges) {
+        return "[" + key + "] " + name + "  x" + charges;
+    }
+
+    private void refreshPowerupHUD() {
+        int rw = (int) mainScreen.getWidth();
+        if (networkResetLabel != null) {
+            networkResetLabel.setLabel(powerupLine("1", "NETWORK RESET", mainScreen.getNetworkResetCharges()));
+            networkResetLabel.setLocation(rw - networkResetLabel.getWidth() - 30, 50);
+        }
+        if (virusScannerLabel != null) {
+            virusScannerLabel.setLabel(powerupLine("2", "VIRUS SCANNER", mainScreen.getVirusScannerCharges()));
+            virusScannerLabel.setLocation(rw - virusScannerLabel.getWidth() - 30, 85);
+        }
+        if (systemPurgeLabel != null) {
+            systemPurgeLabel.setLabel(powerupLine("3", "SYSTEM PURGE", mainScreen.getSystemPurgeCharges()));
+            systemPurgeLabel.setLocation(rw - systemPurgeLabel.getWidth() - 30, 120);
+        }
     }
 
     public void addEnemy(GObject enemy)    { add(enemy);    }
@@ -393,30 +440,111 @@ public class GamePane extends GraphicsPane {
     @Override public void mouseDragged(MouseEvent e)  {}
     @Override public void mouseMoved(MouseEvent e)    {}
     
-    @Override 
-    public void keyPressed(KeyEvent e) {
-    	// Activate Peculiar Audience with 'U' if purchased
-        if (e.getKeyCode() == KeyEvent.VK_U) {
-            // try to consume a Peculiar Audience charge from MainApplication
-            boolean granted = false;
-            try {
-                granted = mainScreen.consumePeculiarAudienceCharge();
-            } catch (Throwable t) {
-                // method may not exist; ignore
+    // ── Virus Scanner timer bar ──────────────────────────────────────────────
+
+    /** Single timer drives both the bar visual and the powerup expiry — no drift possible. */
+    private void activateVirusScanner() {
+        clearVirusScannerBar();
+
+        int rw = (int) mainScreen.getWidth();
+        int rh = (int) mainScreen.getHeight();
+        int barH = 12;
+        int barY = rh - barH - 52;
+
+        vsBarBg = new GRect(0, barY, rw, barH);
+        vsBarBg.setFilled(true);
+        vsBarBg.setFillColor(new Color(20, 60, 20));
+        vsBarBg.setColor(new Color(20, 60, 20));
+        mainScreen.add(vsBarBg); contents.add(vsBarBg);
+
+        vsBarFill = new GRect(0, barY, rw, barH);
+        vsBarFill.setFilled(true);
+        vsBarFill.setFillColor(VS_COLOR);
+        vsBarFill.setColor(VS_COLOR);
+        mainScreen.add(vsBarFill); contents.add(vsBarFill);
+
+        Font fBar = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 16f);
+        vsBarLabel = new GLabel("VIRUS SCANNER ACTIVE", 0, barY - 6);
+        vsBarLabel.setFont(fBar);
+        vsBarLabel.setColor(VS_COLOR);
+        vsBarLabel.setLocation((rw - vsBarLabel.getWidth()) / 2.0, barY - 6);
+        mainScreen.add(vsBarLabel); contents.add(vsBarLabel);
+
+        // One timer handles both the bar shrink and the powerup expiry.
+        // Total ticks = duration / interval. Both end at exactly the same tick.
+        vsBarTotalTicks = VS_DURATION_MS / 16;
+        vsBarTick = 0;
+
+        vsBarTimer = new Timer(16, e -> {
+            vsBarTick++;
+            double progress = (double) vsBarTick / vsBarTotalTicks;
+
+            // Update bar width
+            int newW = (int)(rw * (1.0 - progress));
+            if (vsBarFill != null) vsBarFill.setSize(Math.max(0, newW), barH);
+
+            // Expire powerup and bar together at exactly the same tick
+            if (vsBarTick >= vsBarTotalTicks) {
+                peculiarActive = false;
+                clearVirusScannerBar(); // stops this timer inside
             }
-            if (granted && !peculiarActive) {
-                peculiarActive = true;
-                // 10 seconds duration
-                if (peculiarTimer != null && peculiarTimer.isRunning()) peculiarTimer.stop();
-                peculiarTimer = new Timer(10000, ev -> {
-                    peculiarActive = false;
-                    peculiarTimer.stop();
-                });
-                peculiarTimer.setRepeats(false);
-                peculiarTimer.start();
+        });
+        vsBarTimer.start();
+        // peculiarTimer is no longer used for Virus Scanner — vsBarTimer owns expiry
+        peculiarTimer = null;
+    }
+
+    private void clearVirusScannerBar() {
+        if (vsBarTimer != null) { vsBarTimer.stop(); vsBarTimer = null; }
+        if (vsBarBg    != null) { mainScreen.remove(vsBarBg);    contents.remove(vsBarBg);    vsBarBg    = null; }
+        if (vsBarFill  != null) { mainScreen.remove(vsBarFill);  contents.remove(vsBarFill);  vsBarFill  = null; }
+        if (vsBarLabel != null) { mainScreen.remove(vsBarLabel); contents.remove(vsBarLabel); vsBarLabel = null; }
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int key = e.getKeyCode();
+
+        // 1 — Network Reset: clears active DDoS immediately
+        if (key == KeyEvent.VK_1) {
+            if (ddosActive && mainScreen.consumeNetworkReset()) {
+                // Cancel the DDoS
+                ddosActive = false;
+                if (ddosTimer  != null) { ddosTimer.stop(); ddosTimer = null; }
+                if (ddosOverlay != null) { mainScreen.remove(ddosOverlay); contents.remove(ddosOverlay); ddosOverlay = null; }
+                if (ddosLabel   != null) { mainScreen.remove(ddosLabel);   contents.remove(ddosLabel);   ddosLabel   = null; }
+                flash(new Color(0, 200, 230, 120), 400);
                 playSfx("ability_activate.wav");
+                refreshPowerupHUD();
+            } else if (!ddosActive) {
+                playSfx("ability_fail.wav"); // no DDoS active to clear
             } else {
-                // optional feedback if not granted
+                playSfx("ability_fail.wav"); // no charges
+            }
+        }
+
+        // 2 — Virus Scanner: every kill chains another kill for 10s
+        if (key == KeyEvent.VK_2) {
+            if (!peculiarActive && mainScreen.consumeVirusScanner()) {
+                peculiarActive = true;
+                activateVirusScanner();
+                flash(new Color(57, 255, 100, 80), 300);
+                playSfx("ability_activate.wav");
+                refreshPowerupHUD();
+            } else {
+                playSfx("ability_fail.wav");
+            }
+        }
+
+        // 3 — System Purge: instantly destroys all malicious packets on screen
+        if (key == KeyEvent.VK_3) {
+            if (mainScreen.consumeSystemPurge()) {
+                if (spawner != null) spawner.destroyAllMalicious();
+                flash(new Color(255, 80, 80, 100), 400);
+                shake(18, 300);
+                playSfx("ability_activate.wav");
+                refreshPowerupHUD();
+            } else {
                 playSfx("ability_fail.wav");
             }
         }

@@ -8,7 +8,6 @@ public class CurrencyManager {
 
     public CurrencyManager() {
         this.secureTokens = 0;
-        load();
     }
 
     public void addTokensFromScore(int score, String difficulty) {
@@ -18,13 +17,10 @@ public class CurrencyManager {
 
         int tokensEarned = (int) (score * rate);
         secureTokens += tokensEarned;
-        save();
     }
 
-    /** Adds score directly as dollars — 1 score = $1, no conversion rate. */
     public void addTokens(int amount) {
         secureTokens += amount;
-        save();
     }
 
     public boolean spendTokens(int amount) {

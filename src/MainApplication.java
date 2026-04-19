@@ -28,8 +28,9 @@ public class MainApplication extends GraphicsProgram {
 	private boolean musicOn = true;
 	private boolean sfxOn = true;
 	
-	private int exrtraLifePurchases = 0;
-	private int peculiarAudiencePurchases = 0;
+	private int networkResetCharges = 0;
+	private int virusScannerCharges = 0;
+	private int systemPurgeCharges = 0;
 	
 	private static final String MUSIC_MENU = "menu_music.wav";
 	private static final String MUSIC_GAME = "game_music.wav";
@@ -118,27 +119,25 @@ public class MainApplication extends GraphicsProgram {
 		playGameMusic();
 	}
 	
-	public void grantExtraLifePurchase() {
-		exrtraLifePurchases++;
+	public void grantNetworkResetPurchase()  { networkResetCharges++;  }
+	public int  getNetworkResetCharges()     { return networkResetCharges; }
+	
+	public void grantVirusScannerPurchase()  { virusScannerCharges++;  }
+	public int  getVirusScannerCharges()     { return virusScannerCharges; }
+	public void grantSystemPurgePurchase()   { systemPurgeCharges++;   }
+	public int  getSystemPurgeCharges()      { return systemPurgeCharges; }
+	
+	public boolean consumeNetworkReset() {
+		if (networkResetCharges > 0) { networkResetCharges--; return true; }
+		return false;
 	}
 	
-	public void grantPeculiarAudiencePurchase() {
-		peculiarAudiencePurchases++;
+	public boolean consumeVirusScanner() {
+		if (virusScannerCharges > 0) { virusScannerCharges--; return true; }
+		return false;
 	}
-	
-	public int consumeExtraLifeForSession() {
-		if (exrtraLifePurchases > 0) {
-			exrtraLifePurchases--;
-			return 1;
-		}
-		return 0;
-	}
-	
-	public boolean consumePeculiarAudienceCharge() {
-		if(peculiarAudiencePurchases > 0) {
-			peculiarAudiencePurchases--;
-			return true;
-		}
+	public boolean consumeSystemPurge() {
+		if (systemPurgeCharges > 0) { systemPurgeCharges--; return true; }
 		return false;
 	}
 	
@@ -255,6 +254,10 @@ public class MainApplication extends GraphicsProgram {
 			gameOverPane.setResults(4200, 0, "FIREWALL BREACHED");
 			switchToGameOverScreen();
 			return;
+		}
+		// DEV: press P to add $100 — no return so currentScreen.keyPressed fires too
+		if (e.getKeyCode() == KeyEvent.VK_P) {
+			if (currencyManager != null) currencyManager.addTokens(100);
 		}
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			System.exit(0);

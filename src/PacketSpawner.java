@@ -235,6 +235,29 @@ public class PacketSpawner {
         gamePane.removeEnemy(key);
     }
     
+    /** System Purge — destroys every malicious packet currently on screen. */
+    public void destroyAllMalicious() {
+        int totalPoints = 0;
+        ArrayList<GObject> toDestroy = new ArrayList<>();
+        // Collect first, then destroy — avoids any iteration issues
+        for (GObject obj : new ArrayList<>(enemies)) {
+            PacketType type = typeMap.get(obj);
+            if (type != null && type.isBad()) toDestroy.add(obj);
+        }
+        for (GObject obj : toDestroy) {
+            PacketType type = typeMap.get(obj);
+            if (type == null) continue;
+            double x = obj.getX(), y = obj.getY();
+            removePacket(obj);
+            totalPoints += type.getPoints();
+            showDestroyed(type.getDestroyedSprite(), x, y, type);
+        }
+        if (!toDestroy.isEmpty()) {
+            gamePane.updateScore(totalPoints);
+            gamePane.playSfx("destroy.wav");
+        }
+    }
+
     public void destroyRandomEnemy() {
         try {
             // collect only bad enemies
@@ -253,9 +276,9 @@ public class PacketSpawner {
                 double y = target.getY();
                 removePacket(target);
                 if (type != null) {
-                    // award points only for bad packets
-                    if (type.isBad()) gamePane.updateScore(type.getPoints());
+                    gamePane.updateScore(type.getPoints());
                     showDestroyed(type.getDestroyedSprite(), x, y, type);
+                    gamePane.playSfx("destroy.wav");
                 }
             }
         } catch (Exception ex) {
