@@ -133,7 +133,7 @@ public class GamePane extends GraphicsPane {
     }
 
     private void drawHUD() {
-        scoreLabel = new GLabel("SCORE: " + score, 20, 60);
+        scoreLabel = new GLabel("$" + score, 20, 60);
         scoreLabel.setFont(fScore); scoreLabel.setColor(SCORE_COLOR);
         add(scoreLabel);
 
@@ -162,12 +162,12 @@ public class GamePane extends GraphicsPane {
 
     public void updateScore(int delta) {
         score += delta;
-        if (scoreLabel != null) scoreLabel.setLabel("SCORE: " + score);
+        if (scoreLabel != null) scoreLabel.setLabel("$" + score);
     }
 
     public void deductPoints(int amount) {
         score = Math.max(0, score - amount);
-        if (scoreLabel != null) scoreLabel.setLabel("SCORE: " + score);
+        if (scoreLabel != null) scoreLabel.setLabel("$" + score);
     }
 
     public void loseLife() {
@@ -188,7 +188,7 @@ public class GamePane extends GraphicsPane {
         
         CurrencyManager cm = mainScreen.getCurrencyManager();
         if (cm != null) {
-        	cm.addTokensFromScore(score, mainScreen.getDifficulty());
+        	cm.addTokens(score);
         }
         
         super.hideContent();

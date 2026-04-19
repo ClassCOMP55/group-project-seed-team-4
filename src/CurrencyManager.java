@@ -21,6 +21,12 @@ public class CurrencyManager {
         save();
     }
 
+    /** Adds score directly as dollars — 1 score = $1, no conversion rate. */
+    public void addTokens(int amount) {
+        secureTokens += amount;
+        save();
+    }
+
     public boolean spendTokens(int amount) {
         if (secureTokens >= amount) {
             secureTokens -= amount;
@@ -56,5 +62,3 @@ public class CurrencyManager {
         }
     }
 }
-
-

@@ -37,9 +37,9 @@ public class ShopPane extends GraphicsPane {
 		"Exposes disguised enemies for the duratrion"
 	};
 	private static final String[] ITEM_PRICES = {
-		"800 PTS",
-		"1200 PTS",
-		"1500 PTS"
+		"$800",
+		"$1200",
+		"$1500"
 	};
 	private static final Color[] ITEM_COLORS  = {
 		NEON_GREEN,
@@ -231,7 +231,7 @@ public class ShopPane extends GraphicsPane {
 			mainScreen.remove(tokenLabel);
 			contents.remove(tokenLabel);
 		}
-		String txt = "Secure Tokens: " + currencyManager.getTokens();
+		String txt = "WALLET: $" + currencyManager.getTokens();
 		tokenLabel = new GLabel(txt, 0, 0);
 		tokenLabel.setFont(fSub);
 		tokenLabel.setColor(new Color(200, 240, 255));
@@ -263,14 +263,14 @@ public class ShopPane extends GraphicsPane {
 		int cost = itemCosts[index];
 		if (currencyManager.getTokens() < cost) {
 			JOptionPane.showMessageDialog(null,
-				"Not enough Secure Tokens to purchase \"" + ITEM_NAMES[index] + "\".",
+				"Not enough funds to purchase \"" + ITEM_NAMES[index] + "\".",
 				"Insufficient Tokens",
 				JOptionPane.WARNING_MESSAGE);
 			return;
 		}
 
 		int choice = JOptionPane.showConfirmDialog(null,
-			"Buy \"" + ITEM_NAMES[index] + "\" for " + cost + " Secure Tokens?",
+			"Buy \"" + ITEM_NAMES[index] + "\" for $" + cost + "?",
 			"Confirm Purchase",
 			JOptionPane.YES_NO_OPTION);
 
@@ -290,7 +290,7 @@ public class ShopPane extends GraphicsPane {
 				drawTokenDisplay();
 			} else {
 				JOptionPane.showMessageDialog(null,
-					"Not enough Secure Tokens to complete transaction.",
+					"Not enough funds to complete transaction.",
 					"Insufficient Tokens",
 					JOptionPane.WARNING_MESSAGE);
 			}

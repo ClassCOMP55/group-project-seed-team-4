@@ -60,12 +60,7 @@ public class GameOverPane extends GraphicsPane {
 		this.finalLives   = lives;
 		this.causeOfDeath = cause;
 		
-		String diff = mainScreen.getDifficulty();
-		double rate = 0.02;
-		if ("PRO".equals(diff)) rate = 0.05;
-		else if ("HACKER".equals(diff)) rate = 0.08;
-
-		this.tokensEarnedThisRun = (int) (score * rate);
+		this.tokensEarnedThisRun = score; // score converts 1:1 to dollars
 	}
  
 	@Override
@@ -171,19 +166,19 @@ public class GameOverPane extends GraphicsPane {
 		GLine hdiv = new GLine(bx+20, by+46, bx+bw-20, by+46);
 		hdiv.setColor(DIM_CYAN); addContent(hdiv);
  
-		addStatRow(bx+28, by+86,  "FINAL  SCORE",     String.format("%06d", finalScore), NEON_CYAN);
+		addStatRow(bx+28, by+86,  "FINAL  SCORE",     "$" + finalScore, NEON_CYAN);
 		String livesStr = finalLives <= 0 ? "0   [ CRITICAL ]" : String.valueOf(finalLives);
 		Color  livesCol = finalLives <= 0 ? NEON_RED : NEON_YELLOW;
 		addStatRow(bx+28, by+134, "LIVES  REMAINING", livesStr, livesCol);
+		addStatRow(bx+28, by+158, "EARNED  THIS  RUN",  "$" + tokensEarnedThisRun, NEON_YELLOW);
 		addStatRow(bx+28, by+182, "STATUS",           "OFFLINE", NEON_RED);
-		addStatRow(bx+28, by+158, "TOKENS  EARNED", String.valueOf(tokensEarnedThisRun), NEON_YELLOW);
 
-		// Show total tokens (read from CurrencyManager)
+		// Wallet balance from CurrencyManager (already includes this run's earnings)
 		int totalTokens = 0;
 		if (mainScreen.getCurrencyManager() != null) {
 			totalTokens = mainScreen.getCurrencyManager().getTokens();
 		}
-		addStatRow(bx+28, by+216, "TOTAL  TOKENS", String.valueOf(totalTokens), new Color(180, 220, 255));
+		addStatRow(bx+28, by+206, "WALLET  BALANCE",  "$" + totalTokens, new Color(180, 220, 255));
 
 	}
  
