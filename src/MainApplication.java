@@ -134,6 +134,14 @@ public class MainApplication extends GraphicsProgram {
 		return 0;
 	}
 	
+	public boolean consumePeculiarAudienceCharge() {
+		if(peculiarAudiencePurchases > 0) {
+			peculiarAudiencePurchases--;
+			return true;
+		}
+		return false;
+	}
+	
 	public CurrencyManager getCurrencyManager() {
 		return currencyManager;
 	}
