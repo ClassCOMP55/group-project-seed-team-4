@@ -118,6 +118,22 @@ public class MainApplication extends GraphicsProgram {
 		playGameMusic();
 	}
 	
+	public void grantExtraLifePurchase() {
+		exrtraLifePurchases++;
+	}
+	
+	public void grantPeculiarAudiencePurchase() {
+		peculiarAudiencePurchases++;
+	}
+	
+	public int consumeExtraLifeForSession() {
+		if (exrtraLifePurchases > 0) {
+			exrtraLifePurchases--;
+			return 1;
+		}
+		return 0;
+	}
+	
 	public CurrencyManager getCurrencyManager() {
 		return currencyManager;
 	}
