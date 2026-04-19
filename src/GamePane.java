@@ -304,6 +304,17 @@ public class GamePane extends GraphicsPane {
         mainScreen.playSfx(filename);
     }
 
+ // Called by PacketSpawner when player destroys an enemy (player action)
+    public void onEnemyDestroyed() {
+        // trigger the extra random kill if Peculiar Audience active
+        if (peculiarActive && spawner != null) {
+            //spawner.destroyRandomEnemy();
+        }
+        // normal feedback
+        onPacketDestroyed();
+    }
+
+    
     public void onPacketDestroyed() {
         shake(12, 220);
         playSfx("destroy.wav");
@@ -381,7 +392,36 @@ public class GamePane extends GraphicsPane {
     @Override public void mouseClicked(MouseEvent e)  {}
     @Override public void mouseDragged(MouseEvent e)  {}
     @Override public void mouseMoved(MouseEvent e)    {}
-    @Override public void keyPressed(KeyEvent e)      {}
+    
+    @Override 
+    public void keyPressed(KeyEvent e) {
+    	// Activate Peculiar Audience with 'U' if purchased
+        if (e.getKeyCode() == KeyEvent.VK_U) {
+            // try to consume a Peculiar Audience charge from MainApplication
+            boolean granted = false;
+            try {
+                granted = mainScreen.consumePeculiarAudienceCharge();
+            } catch (Throwable t) {
+                // method may not exist; ignore
+            }
+            if (granted && !peculiarActive) {
+                peculiarActive = true;
+                // 10 seconds duration
+                if (peculiarTimer != null && peculiarTimer.isRunning()) peculiarTimer.stop();
+                peculiarTimer = new Timer(10000, ev -> {
+                    peculiarActive = false;
+                    peculiarTimer.stop();
+                });
+                peculiarTimer.setRepeats(false);
+                peculiarTimer.start();
+                playSfx("ability_activate.wav");
+            } else {
+                // optional feedback if not granted
+                playSfx("ability_fail.wav");
+            }
+        }
+    }
+    
     @Override public void keyReleased(KeyEvent e)     {}
     @Override public void keyTyped(KeyEvent e)        {}
 }
