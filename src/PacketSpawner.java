@@ -110,17 +110,18 @@ public class PacketSpawner {
         phishTimers.put(disguise, flash);
     }
 
-    public void updateEnemies() {
+    public void updateEnemies(double dtSec) {
         try {
             for (GObject obj : new ArrayList<>(enemies)) {
                 PacketType type = typeMap.get(obj);
                 if (type == null) continue;
 
-                double speed = baseEnemySpeed * type.getBaseSpeedMult();
-                obj.move(0, speed);
+                // speed is pixels/second; multiply by elapsed seconds for frame-rate independence
+                double pixelsThisFrame = baseEnemySpeed * type.getBaseSpeedMult() * dtSec;
+                obj.move(0, pixelsThisFrame);
 
                 GObject real = phishReal.get(obj);
-                if (real != null) real.move(0, speed);
+                if (real != null) real.move(0, pixelsThisFrame);
 
                 if (obj.getY() > MainApplication.WINDOW_HEIGHT) {
                     onReachedBottom(obj, type);

@@ -49,20 +49,16 @@ public class GamePane extends GraphicsPane {
     private boolean peculiarActive = false;
     private Timer   peculiarTimer;
 
-    // HUD powerup labels (top-right) — updated dynamically
     private GLabel networkResetLabel;
     private GLabel virusScannerLabel;
     private GLabel systemPurgeLabel;
 
-    // Virus Scanner timer bar
     private static final int   VS_DURATION_MS = 10000;
     private static final Color VS_COLOR       = new Color(57, 255, 100);
     private GRect  vsBarBg;
     private GRect  vsBarFill;
     private GLabel vsBarLabel;
     private Timer  vsBarTimer;
-    private int    vsBarTick;
-    private int    vsBarTotalTicks;
 
     public GamePane(MainApplication mainScreen) {
         super(mainScreen);
@@ -83,19 +79,30 @@ public class GamePane extends GraphicsPane {
         if(peculiarTimer != null) {peculiarTimer.stop(); peculiarTimer = null;}
 
         String diff = mainScreen.getDifficulty();
+
         if (diff.equals("NOOB")) {
-            lives = 5; enemySpeed = 1.5; spawnDelay = 2000; maxEnemies = 4;
+            lives = 5; enemySpeed =  94.0; spawnDelay = 2000; maxEnemies = 4;
         } else if (diff.equals("PRO")) {
-            lives = 3; enemySpeed = 4.0; spawnDelay = 700;  maxEnemies = 9;
-        } else { 
-            lives = 2; enemySpeed = 5.5; spawnDelay = 400; maxEnemies = 12;
+            lives = 3; enemySpeed = 180.0; spawnDelay = 700;  maxEnemies = 9;
+        } else {
+            lives = 2; enemySpeed = 240.0; spawnDelay = 400;  maxEnemies = 12;
         }
         
 
 
 
         spawner  = new PacketSpawner(this, spawnDelay, enemySpeed, maxEnemies);
-        gameLoop = new Timer(16, e -> { if (spawner != null) spawner.updateEnemies(); });
+        
+        final long[] lastTick = { System.nanoTime() };
+        gameLoop = new Timer(16, e -> {
+            if (spawner == null) return;
+            long now     = System.nanoTime();
+            double dtSec = (now - lastTick[0]) / 1_000_000_000.0;
+            lastTick[0]  = now;
+            
+            dtSec = Math.min(dtSec, 0.05);
+            spawner.updateEnemies(dtSec);
+        });
     }
 
     @Override
@@ -351,13 +358,11 @@ public class GamePane extends GraphicsPane {
         mainScreen.playSfx(filename);
     }
 
- // Called by PacketSpawner when player destroys an enemy (player action)
     public void onEnemyDestroyed() {
-        // trigger the extra random kill if Peculiar Audience active
         if (peculiarActive && spawner != null) {
             spawner.destroyRandomEnemy();
         }
-        // normal feedback
+
         onPacketDestroyed();
     }
 
@@ -440,9 +445,6 @@ public class GamePane extends GraphicsPane {
     @Override public void mouseDragged(MouseEvent e)  {}
     @Override public void mouseMoved(MouseEvent e)    {}
     
-    // ── Virus Scanner timer bar ──────────────────────────────────────────────
-
-    /** Single timer drives both the bar visual and the powerup expiry — no drift possible. */
     private void activateVirusScanner() {
         clearVirusScannerBar();
 
@@ -470,27 +472,23 @@ public class GamePane extends GraphicsPane {
         vsBarLabel.setLocation((rw - vsBarLabel.getWidth()) / 2.0, barY - 6);
         mainScreen.add(vsBarLabel); contents.add(vsBarLabel);
 
-        // One timer handles both the bar shrink and the powerup expiry.
-        // Total ticks = duration / interval. Both end at exactly the same tick.
-        vsBarTotalTicks = VS_DURATION_MS / 16;
-        vsBarTick = 0;
+        final long startNano = System.nanoTime();
+        final long durationNano = (long)(VS_DURATION_MS) * 1_000_000L;
 
         vsBarTimer = new Timer(16, e -> {
-            vsBarTick++;
-            double progress = (double) vsBarTick / vsBarTotalTicks;
+            long elapsed = System.nanoTime() - startNano;
+            double progress = (double) elapsed / durationNano;
+            progress = Math.min(progress, 1.0);
 
-            // Update bar width
             int newW = (int)(rw * (1.0 - progress));
             if (vsBarFill != null) vsBarFill.setSize(Math.max(0, newW), barH);
 
-            // Expire powerup and bar together at exactly the same tick
-            if (vsBarTick >= vsBarTotalTicks) {
+            if (progress >= 1.0) {
                 peculiarActive = false;
-                clearVirusScannerBar(); // stops this timer inside
+                clearVirusScannerBar();
             }
         });
         vsBarTimer.start();
-        // peculiarTimer is no longer used for Virus Scanner — vsBarTimer owns expiry
         peculiarTimer = null;
     }
 
