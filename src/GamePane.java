@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.awt.image.MemoryImageSource;
 import java.util.ArrayList;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -25,8 +26,8 @@ public class GamePane extends GraphicsPane {
 
     private Timer   shakeTimer;
     private int     shakeTick;
-    private int     shakeDuration;    
-    private double  shakeMagnitude; 
+    private int     shakeDuration;
+    private double  shakeMagnitude;
     private double  shakeOffsetX = 0;
     private double  shakeOffsetY = 0;
     private final java.util.Random rng = new java.util.Random();
@@ -45,7 +46,7 @@ public class GamePane extends GraphicsPane {
 
     private PacketSpawner spawner;
     private Timer         gameLoop;
-    
+
     private boolean peculiarActive = false;
     private Timer   peculiarTimer;
 
@@ -60,26 +61,41 @@ public class GamePane extends GraphicsPane {
     private GLabel vsBarLabel;
     private Timer  vsBarTimer;
 
+    private static final int   CH_GAP   = 6;
+    private static final int   CH_LEN   = 10;
+    private static final Color CH_COLOR = new Color(255, 255, 255, 220);
+    private GLine chTop, chBottom, chLeft, chRight;
+    private int   cursorX = -999, cursorY = -999;
+
+    private static final int   HM_INNER = 8;
+    private static final int   HM_OUTER = 22;
+    private static final Color HM_COLOR = new Color(255, 255, 255, 255);
+    private static final int   HM_TICKS = 20;
+    private static final double HM_D = 0.7071067811865476;
+    private static final double[][] DIRS = {{HM_D,-HM_D},{-HM_D,HM_D},{-HM_D,-HM_D},{HM_D,HM_D}};
+    private GLine[] hmLines  = new GLine[12];
+    private Timer   hmTimer;
+    private int     hmTick;
+    private double  hmRotation;
+    private int     hmCx, hmCy;
+
     public GamePane(MainApplication mainScreen) {
         super(mainScreen);
         fScore = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 48f);
         fDDoS  = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 72f);
     }
-    
 
     public void startNewGame() {
         hardStop();
         resetShake();
-
-        score      = 0;
-        ddosActive = false;
+        score       = 0;
+        ddosActive  = false;
         ddosOverlay = null;
         ddosLabel   = null;
         peculiarActive = false;
-        if(peculiarTimer != null) {peculiarTimer.stop(); peculiarTimer = null;}
+        if (peculiarTimer != null) { peculiarTimer.stop(); peculiarTimer = null; }
 
         String diff = mainScreen.getDifficulty();
-
         if (diff.equals("NOOB")) {
             lives = 5; enemySpeed =  94.0; spawnDelay = 2000; maxEnemies = 4;
         } else if (diff.equals("PRO")) {
@@ -87,19 +103,14 @@ public class GamePane extends GraphicsPane {
         } else {
             lives = 2; enemySpeed = 240.0; spawnDelay = 400;  maxEnemies = 12;
         }
-        
 
-
-
-        spawner  = new PacketSpawner(this, spawnDelay, enemySpeed, maxEnemies);
-        
+        spawner = new PacketSpawner(this, spawnDelay, enemySpeed, maxEnemies);
         final long[] lastTick = { System.nanoTime() };
         gameLoop = new Timer(16, e -> {
             if (spawner == null) return;
             long now     = System.nanoTime();
             double dtSec = (now - lastTick[0]) / 1_000_000_000.0;
             lastTick[0]  = now;
-            
             dtSec = Math.min(dtSec, 0.05);
             spawner.updateEnemies(dtSec);
         });
@@ -108,6 +119,7 @@ public class GamePane extends GraphicsPane {
     @Override
     public void showContent() {
         mainScreen.setCanvasBackground(new Color(180, 180, 180));
+        setFrameCursor(makeInvisibleCursor());
         drawBackground();
         drawGrid();
         drawHUD();
@@ -118,9 +130,22 @@ public class GamePane extends GraphicsPane {
     @Override
     public void hideContent() {
         mainScreen.setCanvasBackground(Color.WHITE);
+        setFrameCursor(Cursor.getDefaultCursor());
         hardStop();
         resetShake();
         super.hideContent();
+    }
+
+    private Cursor makeInvisibleCursor() {
+        Toolkit tk = Toolkit.getDefaultToolkit();
+        Image blank = tk.createImage(new MemoryImageSource(16, 16, new int[256], 0, 16));
+        return tk.createCustomCursor(blank, new Point(0, 0), "invisible");
+    }
+
+    private void setFrameCursor(Cursor c) {
+        for (Frame f : Frame.getFrames()) {
+            if (f.isVisible()) { f.setCursor(c); break; }
+        }
     }
 
     private void hardStop() {
@@ -129,8 +154,10 @@ public class GamePane extends GraphicsPane {
         if (ddosTimer != null) { ddosTimer.stop(); ddosTimer = null; }
         if (peculiarTimer != null) { peculiarTimer.stop(); peculiarTimer = null; peculiarActive = false; }
         clearVirusScannerBar();
+        clearHitmarker();
+        removeCrosshair();
         stopShake();
-        if (flashTimer != null){ flashTimer.stop(); flashTimer = null; }
+        if (flashTimer != null) { flashTimer.stop(); flashTimer = null; }
     }
 
     private void drawBackground() {
@@ -158,25 +185,21 @@ public class GamePane extends GraphicsPane {
         livesLabel.setFont(fScore); livesLabel.setColor(LIVES_COLOR);
         add(livesLabel);
 
-        // Powerup list — top right
         Font fPower = MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 22f);
         int rw = (int) mainScreen.getWidth();
 
         networkResetLabel = new GLabel(powerupLine("1", "NETWORK RESET", mainScreen.getNetworkResetCharges()), 0, 50);
-        networkResetLabel.setFont(fPower);
-        networkResetLabel.setColor(new Color(0, 200, 230));
+        networkResetLabel.setFont(fPower); networkResetLabel.setColor(new Color(0, 200, 230));
         networkResetLabel.setLocation(rw - networkResetLabel.getWidth() - 30, 50);
         add(networkResetLabel);
 
         virusScannerLabel = new GLabel(powerupLine("2", "VIRUS SCANNER", mainScreen.getVirusScannerCharges()), 0, 85);
-        virusScannerLabel.setFont(fPower);
-        virusScannerLabel.setColor(new Color(57, 255, 100));
+        virusScannerLabel.setFont(fPower); virusScannerLabel.setColor(new Color(57, 255, 100));
         virusScannerLabel.setLocation(rw - virusScannerLabel.getWidth() - 30, 85);
         add(virusScannerLabel);
 
         systemPurgeLabel = new GLabel(powerupLine("3", "SYSTEM PURGE", mainScreen.getSystemPurgeCharges()), 0, 120);
-        systemPurgeLabel.setFont(fPower);
-        systemPurgeLabel.setColor(new Color(255, 80, 80));
+        systemPurgeLabel.setFont(fPower); systemPurgeLabel.setColor(new Color(255, 80, 80));
         systemPurgeLabel.setLocation(rw - systemPurgeLabel.getWidth() - 30, 120);
         add(systemPurgeLabel);
     }
@@ -204,15 +227,8 @@ public class GamePane extends GraphicsPane {
     public void addEnemy(GObject enemy)    { add(enemy);    }
     public void removeEnemy(GObject enemy) { remove(enemy); }
 
-    public void addTemporary(GObject obj) {
-        mainScreen.add(obj);
-        contents.add(obj);
-    }
-
-    public void removeTemporary(GObject obj) {
-        mainScreen.remove(obj);
-        contents.remove(obj);
-    }
+    public void addTemporary(GObject obj) { mainScreen.add(obj); contents.add(obj); }
+    public void removeTemporary(GObject obj) { mainScreen.remove(obj); contents.remove(obj); }
 
     public void updateScore(int delta) {
         score += delta;
@@ -237,180 +253,193 @@ public class GamePane extends GraphicsPane {
     }
 
     private void endGame() {
+        playSfx("destroy.wav");
         hardStop();
         resetShake();
-        
         CurrencyManager cm = mainScreen.getCurrencyManager();
-        if (cm != null) {
-        	cm.addTokens(score);
-        }
-        
+        if (cm != null) cm.addTokens(score);
         super.hideContent();
         mainScreen.switchToGameOverScreen(score, lives, "FIREWALL BREACHED");
     }
 
+    private void removeCrosshair() {
+        if (chTop    != null) { mainScreen.remove(chTop);    chTop    = null; }
+        if (chBottom != null) { mainScreen.remove(chBottom); chBottom = null; }
+        if (chLeft   != null) { mainScreen.remove(chLeft);   chLeft   = null; }
+        if (chRight  != null) { mainScreen.remove(chRight);  chRight  = null; }
+    }
+
+    private void drawCrosshair(int cx, int cy) {
+        removeCrosshair();
+        chTop    = new GLine(cx, cy - CH_GAP, cx, cy - CH_GAP - CH_LEN);
+        chBottom = new GLine(cx, cy + CH_GAP, cx, cy + CH_GAP + CH_LEN);
+        chLeft   = new GLine(cx - CH_GAP, cy, cx - CH_GAP - CH_LEN, cy);
+        chRight  = new GLine(cx + CH_GAP, cy, cx + CH_GAP + CH_LEN, cy);
+        chTop.setColor(CH_COLOR);    mainScreen.add(chTop);
+        chBottom.setColor(CH_COLOR); mainScreen.add(chBottom);
+        chLeft.setColor(CH_COLOR);   mainScreen.add(chLeft);
+        chRight.setColor(CH_COLOR);  mainScreen.add(chRight);
+        for (GLine l : hmLines) { if (l != null) { mainScreen.remove(l); mainScreen.add(l); } }
+    }
+
+    public void triggerHitmarkerAt(int cx, int cy) {
+        spawnHitmarker(cx, cy);
+    }
+
+    private void spawnHitmarker(int cx, int cy) {
+        clearHitmarker();
+        hmCx       = cx;
+        hmCy       = cy;
+        hmRotation = rng.nextDouble() * 40.0 - 20.0;
+        hmTick     = 0;
+
+        double rad = Math.toRadians(hmRotation);
+        double cos = Math.cos(rad), sin = Math.sin(rad);
+
+        for (int arm = 0; arm < 4; arm++) {
+            double dx  = DIRS[arm][0], dy  = DIRS[arm][1];
+            double rdx = dx * cos - dy * sin;
+            double rdy = dx * sin + dy * cos;
+            double px  = -rdy, py = rdx;
+            for (int t = -1; t <= 1; t++) {
+                int idx = arm * 3 + (t + 1);
+                double ox = px * t, oy = py * t;
+                hmLines[idx] = new GLine(
+                    cx + rdx * HM_INNER + ox, cy + rdy * HM_INNER + oy,
+                    cx + rdx * HM_OUTER + ox, cy + rdy * HM_OUTER + oy);
+                hmLines[idx].setColor(HM_COLOR);
+                mainScreen.add(hmLines[idx]);
+            }
+        }
+
+        hmTimer = new Timer(16, e -> {
+            hmTick++;
+            double progress = (double) hmTick / HM_TICKS;
+            if (progress >= 1.0) { clearHitmarker(); return; }
+
+            double inner = HM_INNER + (HM_INNER * 0.6 * progress);
+            double outer = HM_OUTER * (1.0 - progress * 0.4);
+            int alpha    = (int)(255 * (1.0 - progress));
+            Color col    = new Color(HM_COLOR.getRed(), HM_COLOR.getGreen(), HM_COLOR.getBlue(), alpha);
+
+            double rad2 = Math.toRadians(hmRotation);
+            double cos2 = Math.cos(rad2), sin2 = Math.sin(rad2);
+
+            for (int arm = 0; arm < 4; arm++) {
+                double dx  = DIRS[arm][0], dy  = DIRS[arm][1];
+                double rdx = dx * cos2 - dy * sin2;
+                double rdy = dx * sin2 + dy * cos2;
+                double px  = -rdy, py = rdx;
+                for (int t = -1; t <= 1; t++) {
+                    int idx = arm * 3 + (t + 1);
+                    if (hmLines[idx] == null) continue;
+                    double ox = px * t, oy = py * t;
+                    hmLines[idx].setStartPoint(hmCx + rdx * inner + ox, hmCy + rdy * inner + oy);
+                    hmLines[idx].setEndPoint(  hmCx + rdx * outer + ox, hmCy + rdy * outer + oy);
+                    hmLines[idx].setColor(col);
+                    mainScreen.remove(hmLines[idx]);
+                    mainScreen.add(hmLines[idx]);
+                }
+            }
+        });
+        hmTimer.start();
+    }
+
+    private void clearHitmarker() {
+        if (hmTimer != null) { hmTimer.stop(); hmTimer = null; }
+        for (int i = 0; i < 12; i++) {
+            if (hmLines[i] != null) { mainScreen.remove(hmLines[i]); hmLines[i] = null; }
+        }
+    }
+
     public void shake(double magnitude, int durationMs) {
         stopShake();
-
         shakeMagnitude = magnitude;
         shakeDuration  = Math.max(1, durationMs / 16);
         shakeTick      = 0;
-
         shakeTimer = new Timer(16, e -> {
             shakeTick++;
-
-            if (shakeTick >= shakeDuration) {
-                stopShake();
-                return;
-            }
-
-            double prevX = shakeOffsetX;
-            double prevY = shakeOffsetY;
-
+            double prevX = shakeOffsetX, prevY = shakeOffsetY;
+            if (shakeTick >= shakeDuration) { stopShake(); return; }
             double progress = (double) shakeTick / shakeDuration;
-            double decay    = Math.pow(1.0 - progress, 1.8);
-            double mag      = shakeMagnitude * decay;
+            double mag      = shakeMagnitude * Math.pow(1.0 - progress, 1.8);
             double angle    = rng.nextDouble() * 2 * Math.PI;
-
-            shakeOffsetX = Math.cos(angle) * mag;
-            shakeOffsetY = Math.sin(angle) * mag;
-
+            shakeOffsetX    = Math.cos(angle) * mag;
+            shakeOffsetY    = Math.sin(angle) * mag;
             double dx = shakeOffsetX - prevX;
             double dy = shakeOffsetY - prevY;
-            for (GObject obj : new ArrayList<>(contents)) {
-                obj.move(dx, dy);
-            }
+            for (GObject obj : new ArrayList<>(contents)) obj.move(dx, dy);
         });
         shakeTimer.start();
     }
 
     private void stopShake() {
-        if (shakeTimer != null) {
-            shakeTimer.stop();
-            shakeTimer = null;
-        }
-
+        if (shakeTimer != null) { shakeTimer.stop(); shakeTimer = null; }
         if (shakeOffsetX != 0 || shakeOffsetY != 0) {
-            for (GObject obj : new ArrayList<>(contents)) {
-                obj.move(-shakeOffsetX, -shakeOffsetY);
-            }
-            shakeOffsetX  = 0;
-            shakeOffsetY  = 0;
+            for (GObject obj : new ArrayList<>(contents)) obj.move(-shakeOffsetX, -shakeOffsetY);
+            shakeOffsetX = 0;
+            shakeOffsetY = 0;
         }
         shakeMagnitude = 0;
     }
 
-    private void resetShake() {
-        stopShake();
-    }
+    private void resetShake() { stopShake(); }
 
     public void flash(Color color, int durationMs) {
         if (flashTimer != null && flashTimer.isRunning()) {
             flashTimer.stop();
-            if (flashRect != null) {
-                mainScreen.remove(flashRect);
-                contents.remove(flashRect);
-                flashRect = null;
-            }
+            if (flashRect != null) { mainScreen.remove(flashRect); contents.remove(flashRect); flashRect = null; }
         }
-
         int rw = (int) mainScreen.getWidth();
         int rh = (int) mainScreen.getHeight();
-
         flashRect = new GRect(0, 0, rw, rh);
-        flashRect.setFilled(true);
-        flashRect.setColor(color);
-        flashRect.setFillColor(color);
-        mainScreen.add(flashRect);
-        contents.add(flashRect);
-
+        flashRect.setFilled(true); flashRect.setColor(color); flashRect.setFillColor(color);
+        mainScreen.add(flashRect); contents.add(flashRect);
         flashColor    = color;
         flashDuration = durationMs / 16;
         flashTick     = 0;
-
         flashTimer = new Timer(16, e -> {
             flashTick++;
             double progress = (double) flashTick / flashDuration;
-
             if (progress >= 1.0) {
-                flashTimer.stop();
-                flashTimer = null;
-                mainScreen.remove(flashRect);
-                contents.remove(flashRect);
-                flashRect = null;
+                flashTimer.stop(); flashTimer = null;
+                mainScreen.remove(flashRect); contents.remove(flashRect); flashRect = null;
                 return;
             }
-
             int alpha = (int)(flashColor.getAlpha() * (1.0 - progress));
-            Color faded = new Color(
-                flashColor.getRed(),
-                flashColor.getGreen(),
-                flashColor.getBlue(),
-                alpha
-            );
-            flashRect.setFillColor(faded);
-            flashRect.setColor(faded);
+            Color faded = new Color(flashColor.getRed(), flashColor.getGreen(), flashColor.getBlue(), alpha);
+            flashRect.setFillColor(faded); flashRect.setColor(faded);
         });
         flashTimer.start();
     }
 
-    public void playSfx(String filename) {
-        mainScreen.playSfx(filename);
-    }
+    public void playSfx(String filename) { mainScreen.playSfx(filename); }
 
     public void onEnemyDestroyed() {
-        if (peculiarActive && spawner != null) {
-            spawner.destroyRandomEnemy();
-        }
-
+        if (peculiarActive && spawner != null) spawner.destroyRandomEnemy();
         onPacketDestroyed();
     }
 
-    
-    public void onPacketDestroyed() {
-        shake(12, 220);
-        playSfx("destroy.wav");
-    }
-
-    public void onFriendlyDestroyed() {
-        shake(12, 220);
-        flash(new Color(255, 30, 30, 150), 400);
-        playSfx("friendly_destroyed.wav");
-    }
-
-    public void onFriendlyPassedThrough() {
-        shake(5, 150);
-        flash(new Color(57, 255, 100, 20), 400); // green
-    }
-
-    public void onMaliciousBreached() {
-        shake(28, 350);
-        flash(new Color(255, 30, 30, 180), 500);  // red
-    }
+    public void onPacketDestroyed() { shake(12, 220); playSfx("destroy.wav"); }
+    public void onFriendlyDestroyed() { shake(12, 220); flash(new Color(255, 30, 30, 150), 400); playSfx("friendly_destroyed.wav"); }
+    public void onFriendlyPassedThrough() { shake(5, 150); flash(new Color(57, 255, 100, 20), 400); }
+    public void onMaliciousBreached() { shake(28, 350); flash(new Color(255, 30, 30, 180), 500); }
 
     public void triggerDDoS() {
         if (ddosActive) return;
         ddosActive = true;
-
         onMaliciousBreached();
-
         int rw = (int) mainScreen.getWidth();
         int rh = (int) mainScreen.getHeight();
-
         ddosOverlay = new GRect(0, 0, rw, rh);
         ddosOverlay.setFilled(true);
         ddosOverlay.setFillColor(new Color(180, 0, 0, 160));
         ddosOverlay.setColor(new Color(180, 0, 0, 0));
-        mainScreen.add(ddosOverlay);
-        contents.add(ddosOverlay);
-
+        mainScreen.add(ddosOverlay); contents.add(ddosOverlay);
         ddosLabel = new GLabel("YOU HAVE BEEN DDOS'D", 0, 0);
-        ddosLabel.setFont(fDDoS);
-        ddosLabel.setColor(Color.WHITE);
+        ddosLabel.setFont(fDDoS); ddosLabel.setColor(Color.WHITE);
         ddosLabel.setLocation((rw - ddosLabel.getWidth()) / 2.0, rh / 2.0);
-        mainScreen.add(ddosLabel);
-        contents.add(ddosLabel);
-
+        mainScreen.add(ddosLabel); contents.add(ddosLabel);
         ddosTimer = new Timer(3000, e -> {
             ddosActive = false;
             if (ddosOverlay != null) { mainScreen.remove(ddosOverlay); contents.remove(ddosOverlay); ddosOverlay = null; }
@@ -425,68 +454,62 @@ public class GamePane extends GraphicsPane {
     public void mousePressed(MouseEvent e) {
         if (ddosActive) return;
         int mx = e.getX(), my = e.getY();
-        
         GObject clicked = mainScreen.getElementAtLocation(mx, my);
-        if (clicked == flashRect || clicked == ddosOverlay || clicked == ddosLabel) {
+        if (clicked == flashRect || clicked == ddosOverlay || clicked == ddosLabel
+                || clicked == chTop || clicked == chBottom || clicked == chLeft || clicked == chRight) {
             clicked = null;
         }
-       
+        for (GLine hm : hmLines) { if (hm != null && hm == clicked) { clicked = null; break; } }
+
         if (clicked == null) {
             if (spawner != null) spawner.destroyEnemyAt(mx, my);
             return;
         }
         if (spawner != null && spawner.isEnemy(clicked)) {
+            spawnHitmarker(mx, my);
             spawner.destroyEnemy(clicked);
         }
     }
 
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        cursorX = e.getX(); cursorY = e.getY();
+        drawCrosshair(cursorX, cursorY);
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        cursorX = e.getX(); cursorY = e.getY();
+        drawCrosshair(cursorX, cursorY);
+    }
+
     @Override public void mouseReleased(MouseEvent e) {}
     @Override public void mouseClicked(MouseEvent e)  {}
-    @Override public void mouseDragged(MouseEvent e)  {}
-    @Override public void mouseMoved(MouseEvent e)    {}
-    
+
     private void activateVirusScanner() {
         clearVirusScannerBar();
-
         int rw = (int) mainScreen.getWidth();
         int rh = (int) mainScreen.getHeight();
         int barH = 12;
         int barY = rh - barH - 52;
-
         vsBarBg = new GRect(0, barY, rw, barH);
-        vsBarBg.setFilled(true);
-        vsBarBg.setFillColor(new Color(20, 60, 20));
-        vsBarBg.setColor(new Color(20, 60, 20));
+        vsBarBg.setFilled(true); vsBarBg.setFillColor(new Color(20, 60, 20)); vsBarBg.setColor(new Color(20, 60, 20));
         mainScreen.add(vsBarBg); contents.add(vsBarBg);
-
         vsBarFill = new GRect(0, barY, rw, barH);
-        vsBarFill.setFilled(true);
-        vsBarFill.setFillColor(VS_COLOR);
-        vsBarFill.setColor(VS_COLOR);
+        vsBarFill.setFilled(true); vsBarFill.setFillColor(VS_COLOR); vsBarFill.setColor(VS_COLOR);
         mainScreen.add(vsBarFill); contents.add(vsBarFill);
-
         Font fBar = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 16f);
         vsBarLabel = new GLabel("VIRUS SCANNER ACTIVE", 0, barY - 6);
-        vsBarLabel.setFont(fBar);
-        vsBarLabel.setColor(VS_COLOR);
+        vsBarLabel.setFont(fBar); vsBarLabel.setColor(VS_COLOR);
         vsBarLabel.setLocation((rw - vsBarLabel.getWidth()) / 2.0, barY - 6);
         mainScreen.add(vsBarLabel); contents.add(vsBarLabel);
-
-        final long startNano = System.nanoTime();
-        final long durationNano = (long)(VS_DURATION_MS) * 1_000_000L;
-
+        final long startNano   = System.nanoTime();
+        final long durationNano = (long) VS_DURATION_MS * 1_000_000L;
         vsBarTimer = new Timer(16, e -> {
-            long elapsed = System.nanoTime() - startNano;
-            double progress = (double) elapsed / durationNano;
-            progress = Math.min(progress, 1.0);
-
-            int newW = (int)(rw * (1.0 - progress));
-            if (vsBarFill != null) vsBarFill.setSize(Math.max(0, newW), barH);
-
-            if (progress >= 1.0) {
-                peculiarActive = false;
-                clearVirusScannerBar();
-            }
+            long elapsed   = System.nanoTime() - startNano;
+            double progress = Math.min((double) elapsed / durationNano, 1.0);
+            if (vsBarFill != null) vsBarFill.setSize(Math.max(0, (int)(rw * (1.0 - progress))), barH);
+            if (progress >= 1.0) { peculiarActive = false; clearVirusScannerBar(); }
         });
         vsBarTimer.start();
         peculiarTimer = null;
@@ -502,26 +525,19 @@ public class GamePane extends GraphicsPane {
     @Override
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
-
-        // 1 — Network Reset: clears active DDoS immediately
         if (key == KeyEvent.VK_1) {
             if (ddosActive && mainScreen.consumeNetworkReset()) {
-                // Cancel the DDoS
                 ddosActive = false;
-                if (ddosTimer  != null) { ddosTimer.stop(); ddosTimer = null; }
+                if (ddosTimer   != null) { ddosTimer.stop(); ddosTimer = null; }
                 if (ddosOverlay != null) { mainScreen.remove(ddosOverlay); contents.remove(ddosOverlay); ddosOverlay = null; }
                 if (ddosLabel   != null) { mainScreen.remove(ddosLabel);   contents.remove(ddosLabel);   ddosLabel   = null; }
                 flash(new Color(0, 200, 230, 120), 400);
                 playSfx("ability_activate.wav");
                 refreshPowerupHUD();
-            } else if (!ddosActive) {
-                playSfx("ability_fail.wav"); // no DDoS active to clear
             } else {
-                playSfx("ability_fail.wav"); // no charges
+                playSfx("ability_fail.wav");
             }
         }
-
-        // 2 — Virus Scanner: every kill chains another kill for 10s
         if (key == KeyEvent.VK_2) {
             if (!peculiarActive && mainScreen.consumeVirusScanner()) {
                 peculiarActive = true;
@@ -533,8 +549,6 @@ public class GamePane extends GraphicsPane {
                 playSfx("ability_fail.wav");
             }
         }
-
-        // 3 — System Purge: instantly destroys all malicious packets on screen
         if (key == KeyEvent.VK_3) {
             if (mainScreen.consumeSystemPurge()) {
                 if (spawner != null) spawner.destroyAllMalicious();
@@ -547,7 +561,8 @@ public class GamePane extends GraphicsPane {
             }
         }
     }
+
+    @Override public void keyReleased(KeyEvent e) {}
+    @Override public void keyTyped(KeyEvent e)    {}
     
-    @Override public void keyReleased(KeyEvent e)     {}
-    @Override public void keyTyped(KeyEvent e)        {}
 }

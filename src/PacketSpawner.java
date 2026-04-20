@@ -171,6 +171,7 @@ public class PacketSpawner {
         for (GObject obj : new ArrayList<>(enemies)) {
             double ex = obj.getX(), ey = obj.getY();
             if (mx >= ex && mx <= ex + PACKET_SIZE && my >= ey && my <= ey + PACKET_SIZE) {
+                gamePane.triggerHitmarkerAt(mx, my);
                 destroyEnemy(obj);
                 return;
             }
@@ -179,6 +180,7 @@ public class PacketSpawner {
         for (GObject real : new ArrayList<>(phishReal.values())) {
             double ex = real.getX(), ey = real.getY();
             if (mx >= ex && mx <= ex + PACKET_SIZE && my >= ey && my <= ey + PACKET_SIZE) {
+                gamePane.triggerHitmarkerAt(mx, my);
                 destroyEnemy(real);
                 return;
             }
