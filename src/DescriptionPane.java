@@ -104,11 +104,11 @@ public class DescriptionPane extends GraphicsPane{
             addContent(title);
 
             // description text
-//            String desc = packetDescription(p);
-//            GLabel descLbl = new GLabel(wrapText(desc, 60), labelX, y + 56);
-//            descLbl.setFont(fNote);
-//            descLbl.setColor(TEXT_COL);
-//            addContent(descLbl);
+            String desc = packetDescription(p);
+            GLabel descLbl = new GLabel(wrapText(desc, 60), labelX, y + 56);
+            descLbl.setFont(fNote);
+            descLbl.setColor(TEXT_COL);
+            addContent(descLbl);
         }
 	}
 	private String packetDescription(PacketType p) {
@@ -132,6 +132,24 @@ public class DescriptionPane extends GraphicsPane{
                     return "Malicious packet — destroy it.";
             }
         }
+    }
+	
+	private String wrapText(String s, int maxCharsPerLine) {
+        String[] words = s.split(" ");
+        StringBuilder out = new StringBuilder();
+        int lineLen = 0;
+        for (String w : words) {
+            if (lineLen + w.length() + 1 > maxCharsPerLine) {
+                out.append("\n");
+                lineLen = 0;
+            } else if (out.length() > 0) {
+                out.append(" ");
+                lineLen++;
+            }
+            out.append(w);
+            lineLen += w.length();
+        }
+        return out.toString();
     }
 
 }
