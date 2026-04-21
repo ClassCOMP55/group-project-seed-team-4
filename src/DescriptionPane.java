@@ -110,6 +110,28 @@ public class DescriptionPane extends GraphicsPane{
 //            descLbl.setColor(TEXT_COL);
 //            addContent(descLbl);
         }
-
 	}
+	private String packetDescription(PacketType p) {
+        if (!p.isBad()) {
+            if (p == PacketType.GOOD) return "Good packet — safe. DO NOT click. Clicking costs a life and penalties.";
+            if (p == PacketType.DATA_BURST) return "Good burst — safe, grants slightly more points if left alone.";
+            return "Safe packet.";
+        } else {
+            switch (p) {
+                case VIRUS:
+                    return "Virus — malicious. Click to destroy. If it reaches the base you lose 1 life.";
+                case TROJAN:
+                    return "Trojan — faster malicious. Click to destroy or you'll lose a life on breach.";
+                case DDOS:
+                    return "DDOS — fast. If it reaches the base it disables your abilities for 20s. Click to destroy.";
+                case PHISHING:
+                    return "Phishing — disguises itself as a good packet. Clicking will reveal its harmful effect.";
+                case RANSOMWARE:
+                    return "Ransomware — on breach it deducts points (ransom). Click to destroy to prevent penalty.";
+                default:
+                    return "Malicious packet — destroy it.";
+            }
+        }
+    }
+
 }
