@@ -31,7 +31,7 @@ public class DescriptionPane extends GraphicsPane{
 		drawBackground();
 		drawHeader();
 		drawPacketLegend();
-//		drawFooterButtons();
+		drawFooterButtons();
 	}
 	
 	@Override
@@ -151,5 +151,37 @@ public class DescriptionPane extends GraphicsPane{
         }
         return out.toString();
     }
+
+	 private void drawFooterButtons() {
+	        int btnW = 320, btnH = 68;
+	        int bx = W - btnW - 60;
+	        int by = H - btnH - 40;
+
+	        // Continue button
+	        GRect cont = new GRect(bx, by, btnW, btnH);
+	        cont.setFilled(true); cont.setFillColor(PANEL_BG); cont.setColor(ACCENT);
+	        addContent(cont);
+
+	        GLabel contLbl = new GLabel("[ CONTINUE ]", 0, 0);
+	        contLbl.setFont(MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 22f));
+	        contLbl.setColor(ACCENT);
+	        contLbl.setLocation(bx + (btnW - contLbl.getWidth()) / 2.0, by + (btnH / 2.0) + 8);
+	        addContent(contLbl);
+
+	        continueRegion = new Rectangle(bx, by, btnW, btnH);
+
+	        // Back button (top-left)
+	        GRect back = new GRect(40, H - 88, 220, 48);
+	        back.setFilled(true); back.setFillColor(PANEL_BG); back.setColor(ACCENT);
+	        addContent(back);
+
+	        GLabel backLbl = new GLabel("< BACK TO MENU", 0, 0);
+	        backLbl.setFont(MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 18f));
+	        backLbl.setColor(ACCENT);
+	        backLbl.setLocation(40 + (220 - backLbl.getWidth()) / 2.0, H - 88 + (48 / 2.0) + 6);
+	        addContent(backLbl);
+
+	        backRegion = new Rectangle(40, H - 88, 220, 48);
+	    }
 
 }
