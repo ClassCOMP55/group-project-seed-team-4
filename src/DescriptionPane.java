@@ -30,7 +30,7 @@ public class DescriptionPane extends GraphicsPane{
 	public void showContent() {
 		drawBackground();
 		drawHeader();
-//		drawPacketLegend();
+		drawPacketLegend();
 //		drawFooterButtons();
 	}
 	
@@ -58,5 +58,58 @@ public class DescriptionPane extends GraphicsPane{
         GLabel sub = new GLabel("Click hostile packets, avoid friendly ones. Know the threats.", 40, 120);
         sub.setFont(fBody); sub.setColor(TEXT_COL);
         addContent(sub);
+	}
+	
+	private void drawPacketLegend() {
+		 // layout: left column for image, right for text; multiple rows
+        int startX = 60;
+        int startY = 160;
+        int rowH = 120;
+        int imgSize = 96;
+        int labelX = startX + imgSize + 28;
+
+        PacketType[] list = {
+            PacketType.GOOD,
+            PacketType.DATA_BURST,
+            PacketType.VIRUS,
+            PacketType.TROJAN,
+            PacketType.DDOS,
+            PacketType.PHISHING,
+            PacketType.RANSOMWARE
+        };
+
+        for (int i = 0; i < list.length; i++) {
+            PacketType p = list[i];
+            int y = startY + i * rowH;
+
+            // image (attempt to load sprite; fallback rect handled by makeSprite-like code)
+            GObject img;
+            try {
+                GImage g = new GImage("images/" + p.getNormalSprite(), startX, y);
+                g.setSize(imgSize, imgSize);
+                img = g;
+            } catch (Exception e) {
+                GRect r = new GRect(startX, y, imgSize, imgSize);
+                r.setFilled(true);
+                r.setFillColor(Color.DARK_GRAY);
+                r.setColor(Color.WHITE);
+                img = r;
+            }
+            addContent(img);
+
+            // title
+            GLabel title = new GLabel(p.name().replace('_', ' '), labelX, y + 28);
+            title.setFont(fBody.deriveFont(Font.BOLD, 20f));
+            title.setColor(ACCENT);
+            addContent(title);
+
+            // description text
+//            String desc = packetDescription(p);
+//            GLabel descLbl = new GLabel(wrapText(desc, 60), labelX, y + 56);
+//            descLbl.setFont(fNote);
+//            descLbl.setColor(TEXT_COL);
+//            addContent(descLbl);
+        }
+
 	}
 }
