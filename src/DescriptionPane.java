@@ -28,8 +28,8 @@ public class DescriptionPane extends GraphicsPane{
 	
 	@Override
 	public void showContent() {
-//		drawBackground();
-//		drawHeader();
+		drawBackground();
+		drawHeader();
 //		drawPacketLegend();
 //		drawFooterButtons();
 	}
@@ -40,5 +40,23 @@ public class DescriptionPane extends GraphicsPane{
 		contents.clear();
 		continueRegion = null;
 		backRegion = null;
+	}
+	
+	private void addContent(GObject o) { contents.add(o); mainScreen.add(o); }
+	
+	private void drawBackground() {
+		GRect bg = new GRect(0, 0, W, H);
+		bg.setFilled(true); bg.setFillColor(BG); bg.setColor(BG);
+		addContent(bg);
+	}
+	
+	private void drawHeader() {
+		GLabel title = new GLabel("HOW TO PLAY", 40, 80);
+        title.setFont(fTitle); title.setColor(ACCENT);
+        addContent(title);
+
+        GLabel sub = new GLabel("Click hostile packets, avoid friendly ones. Know the threats.", 40, 120);
+        sub.setFont(fBody); sub.setColor(TEXT_COL);
+        addContent(sub);
 	}
 }
