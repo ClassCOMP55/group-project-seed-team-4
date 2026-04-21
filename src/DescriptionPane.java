@@ -26,4 +26,19 @@ public class DescriptionPane extends GraphicsPane{
 		this.mainScreen = mainScreen;
 	}
 	
+	@Override
+	public void showContent() {
+//		drawBackground();
+//		drawHeader();
+//		drawPacketLegend();
+//		drawFooterButtons();
+	}
+	
+	@Override
+	public void hideContent() {
+		for (GObject o : contents) mainScreen.remove(o);
+		contents.clear();
+		continueRegion = null;
+		backRegion = null;
+	}
 }
