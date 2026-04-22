@@ -170,7 +170,10 @@ public class WelcomePane extends GraphicsPane {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		int mx = e.getX(), my = e.getY();
-		if      (startRegion    != null && startRegion.contains(mx, my))    mainScreen.switchToDifficultyScreen();
+		if (startRegion != null && startRegion.contains(mx, my)) {
+	        if (mainScreen.isShowHints()) mainScreen.switchToDescriptionScreen();
+	        else mainScreen.switchToDifficultyScreen();
+	    }
 		else if (settingsRegion != null && settingsRegion.contains(mx, my)) mainScreen.switchToSettingsScreen();
 		else if (shopRegion     != null && shopRegion.contains(mx, my))     mainScreen.switchToShopScreen();
 	}

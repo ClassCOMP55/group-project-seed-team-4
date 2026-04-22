@@ -27,6 +27,7 @@ public class MainApplication extends GraphicsProgram {
 	private SoundPlayer     soundPlayer;
 	private boolean musicOn = true;
 	private boolean sfxOn = true;
+	private boolean showHints = true;
 	
 	private int networkResetCharges = 0;
 	private int virusScannerCharges = 0;
@@ -108,7 +109,7 @@ public class MainApplication extends GraphicsProgram {
 	}
 	
 	public void switchToWelcomeScreen()     { switchToScreen(welcomePane); playMenuMusic(); }
-	public void switchToDescriptionScreen() { switchToScreen(descriptionPane); }
+	public void switchToDescriptionScreen() { switchToScreen(descriptionPane); playMenuMusic(); }
 	public void switchToSettingsScreen()    { switchToScreen(settingsPane); playMenuMusic(); }
 	public void switchToShopScreen()        { switchToScreen(shopPane); playMenuMusic(); }
 	public void switchToDifficultyScreen()  { switchToScreen(difficultyPane); playMenuMusic(); }
@@ -167,6 +168,9 @@ public class MainApplication extends GraphicsProgram {
     public void setSfxOn(boolean on) {
         sfxOn = on;
     }
+
+    public boolean isShowHints() { return showHints; }
+    public void setShowHints(boolean v) { showHints = v; }
 
     private void playMenuMusic() {
         if (!musicOn) return;

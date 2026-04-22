@@ -124,6 +124,7 @@ public class SettingsPane extends GraphicsPane {
 		// sync values with mainScreen state
 		settingValues[0] = mainScreen.isSfxOn() ? "ON" : "OFF";
 		settingValues[1] = mainScreen.isMusicOn() ? "ON" : "OFF";
+		settingValues[2] = mainScreen.isShowHints() ? "ON" : "OFF";
 
 		for (int i = 0; i < SETTING_LABELS.length; i++) {
 			int ry = panelY + 20 + i * (rowH + gap);
@@ -221,8 +222,12 @@ public class SettingsPane extends GraphicsPane {
 			mainScreen.setMusicOn(now);
 			settingValues[1] = now ? "ON" : "OFF";
 			if (valueLabels[1] != null) valueLabels[1].setLabel(settingValues[1]);
+		}else if (index == 2) {
+		    boolean now = !mainScreen.isShowHints();
+		    mainScreen.setShowHints(now);
+		    settingValues[2] = now ? "ON" : "OFF";
+		    if (valueLabels[2] != null) valueLabels[2].setLabel(settingValues[2]);
 		}
-		// index 2 (hints) left unchanged for now
 	}
 }
 

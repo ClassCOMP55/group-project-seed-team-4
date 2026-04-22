@@ -183,5 +183,17 @@ public class DescriptionPane extends GraphicsPane{
 
 	        backRegion = new Rectangle(40, H - 88, 220, 48);
 	    }
-
+	 @Override
+	 public void mouseClicked(MouseEvent e) {
+		 int mx = e.getX(), my = e.getY();
+		 if (continueRegion != null && continueRegion.contains(mx, my)) {
+			 //proceed to difficulty / start flow
+			 mainScreen.switchToDifficultyScreen();
+			 return;
+		 }
+		 if (backRegion != null && backRegion.contains(mx, my)) {
+			 mainScreen.switchToWelcomeScreen();
+			 return;
+		 }
+	 }
 }
