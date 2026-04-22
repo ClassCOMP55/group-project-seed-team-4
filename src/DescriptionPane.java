@@ -4,64 +4,63 @@ import acm.graphics.*;
 import javax.swing.*;
 
 public class DescriptionPane extends GraphicsPane{
-	
-	private static final int W = MainApplication.WINDOW_WIDTH;
-	private static final int H = MainApplication.WINDOW_HEIGHT;
-	
-	private static final Color BG = new Color(0, 1, 4);
-	private static final Color ACCENT = new Color(0, 200, 230);
-	private static final Color PANEL_BG = new Color(0, 8, 18);
-	private static final Color TEXT_COL = new Color(200, 240, 255);
-	
-	private Font fTitle = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 52f);
-	private Font fBody = MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 20f);
-	private Font fNote = MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 16f);
-	private Rectangle continueRegion;
-	private Rectangle backRegion;
-	
-	private MainApplication mainScreen;
 
-	public DescriptionPane(MainApplication mainScreen) {
-		super(mainScreen);
-		this.mainScreen = mainScreen;
-	}
-	
-	@Override
-	public void showContent() {
-		drawBackground();
-		drawHeader();
-		drawPacketLegend();
-		drawFooterButtons();
-	}
-	
-	@Override
-	public void hideContent() {
-		for (GObject o : contents) mainScreen.remove(o);
-		contents.clear();
-		continueRegion = null;
-		backRegion = null;
-	}
-	
-	private void addContent(GObject o) { contents.add(o); mainScreen.add(o); }
-	
-	private void drawBackground() {
-		GRect bg = new GRect(0, 0, W, H);
-		bg.setFilled(true); bg.setFillColor(BG); bg.setColor(BG);
-		addContent(bg);
-	}
-	
-	private void drawHeader() {
-		GLabel title = new GLabel("HOW TO PLAY", 40, 80);
+    private static final int W = MainApplication.WINDOW_WIDTH;
+    private static final int H = MainApplication.WINDOW_HEIGHT;
+
+    private static final Color BG = new Color(0, 1, 4);
+    private static final Color ACCENT = new Color(0, 200, 230);
+    private static final Color PANEL_BG = new Color(0, 8, 18);
+    private static final Color TEXT_COL = new Color(200, 240, 255);
+
+    private Font fTitle = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 52f);
+    private Font fBody = MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 20f);
+    private Font fNote = MainApplication.FONT_ITHACA.deriveFont(Font.PLAIN, 16f);
+    private Rectangle continueRegion;
+    private Rectangle backRegion;
+
+    private MainApplication mainScreen;
+
+    public DescriptionPane(MainApplication mainScreen) {
+        super(mainScreen);
+        this.mainScreen = mainScreen;
+    }
+
+    @Override
+    public void showContent() {
+        drawBackground();
+        drawHeader();
+        drawPacketLegend();
+        drawFooterButtons();
+    }
+
+    @Override
+    public void hideContent() {
+        for (GObject o : contents) mainScreen.remove(o);
+        contents.clear();
+        continueRegion = null;
+        backRegion = null;
+    }
+
+    private void addContent(GObject o) { contents.add(o); mainScreen.add(o); }
+
+    private void drawBackground() {
+        GRect bg = new GRect(0, 0, W, H);
+        bg.setFilled(true); bg.setFillColor(BG); bg.setColor(BG);
+        addContent(bg);
+    }
+
+    private void drawHeader() {
+        GLabel title = new GLabel("HOW TO PLAY", 40, 80);
         title.setFont(fTitle); title.setColor(ACCENT);
         addContent(title);
 
         GLabel sub = new GLabel("Click hostile packets, avoid friendly ones. Know the threats.", 40, 120);
         sub.setFont(fBody); sub.setColor(TEXT_COL);
         addContent(sub);
-	}
-	
-	private void drawPacketLegend() {
-		 // layout: left column for image, right for text; multiple rows
+    }
+
+    private void drawPacketLegend() {
         int startX = 60;
         int startY = 160;
         int rowH = 120;
@@ -82,7 +81,6 @@ public class DescriptionPane extends GraphicsPane{
             PacketType p = list[i];
             int y = startY + i * rowH;
 
-            // image (attempt to load sprite; fallback rect handled by makeSprite-like code)
             GObject img;
             try {
                 GImage g = new GImage("images/" + p.getNormalSprite(), startX, y);
@@ -97,21 +95,20 @@ public class DescriptionPane extends GraphicsPane{
             }
             addContent(img);
 
-            // title
             GLabel title = new GLabel(p.name().replace('_', ' '), labelX, y + 28);
             title.setFont(fBody.deriveFont(Font.BOLD, 20f));
             title.setColor(ACCENT);
             addContent(title);
 
-            // description text
             String desc = packetDescription(p);
             GLabel descLbl = new GLabel(wrapText(desc, 60), labelX, y + 56);
             descLbl.setFont(fNote);
             descLbl.setColor(TEXT_COL);
             addContent(descLbl);
         }
-	}
-	private String packetDescription(PacketType p) {
+    }
+
+    private String packetDescription(PacketType p) {
         if (!p.isBad()) {
             if (p == PacketType.GOOD) return "Good packet — safe. DO NOT click. Clicking costs a life and penalties.";
             if (p == PacketType.DATA_BURST) return "Good burst — safe, grants slightly more points if left alone.";
@@ -133,8 +130,8 @@ public class DescriptionPane extends GraphicsPane{
             }
         }
     }
-	
-	private String wrapText(String s, int maxCharsPerLine) {
+
+    private String wrapText(String s, int maxCharsPerLine) {
         String[] words = s.split(" ");
         StringBuilder out = new StringBuilder();
         int lineLen = 0;
@@ -152,48 +149,54 @@ public class DescriptionPane extends GraphicsPane{
         return out.toString();
     }
 
-	 private void drawFooterButtons() {
-	        int btnW = 320, btnH = 68;
-	        int bx = W - btnW - 60;
-	        int by = H - btnH - 40;
+    private void drawFooterButtons() {
+        int btnW = 360, btnH = 78;
+        int gap = 18;
+        int bx = W - btnW - 60;
+        int by = H - btnH - 120; // continue y
 
-	        // Continue button
-	        GRect cont = new GRect(bx, by, btnW, btnH);
-	        cont.setFilled(true); cont.setFillColor(PANEL_BG); cont.setColor(ACCENT);
-	        addContent(cont);
+        // Continue button (lower)
+        GRect cont = new GRect(bx, by, btnW, btnH);
+        cont.setFilled(true); cont.setFillColor(PANEL_BG); cont.setColor(ACCENT);
+        addContent(cont);
 
-	        GLabel contLbl = new GLabel("[ CONTINUE ]", 0, 0);
-	        contLbl.setFont(MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 22f));
-	        contLbl.setColor(ACCENT);
-	        contLbl.setLocation(bx + (btnW - contLbl.getWidth()) / 2.0, by + (btnH / 2.0) + 8);
-	        addContent(contLbl);
+        GLabel contLbl = new GLabel("[ CONTINUE ]", 0, 0);
+        contLbl.setFont(MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 22f));
+        contLbl.setColor(ACCENT);
+        contLbl.setLocation(bx + (btnW - contLbl.getWidth()) / 2.0, by + (btnH / 2.0) + 8);
+        addContent(contLbl);
 
-	        continueRegion = new Rectangle(bx, by, btnW, btnH);
+        continueRegion = new Rectangle(bx, by, btnW, btnH);
 
-	        // Back button (top-left)
-	        GRect back = new GRect(40, H - 88, 220, 48);
-	        back.setFilled(true); back.setFillColor(PANEL_BG); back.setColor(ACCENT);
-	        addContent(back);
+        // Back button (above Continue)
+        int backW = 260, backH = 60;
+        int backX = bx; // align right with continue
+        int backY = by - backH - gap; // place above continue
 
-	        GLabel backLbl = new GLabel("< BACK TO MENU", 0, 0);
-	        backLbl.setFont(MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 18f));
-	        backLbl.setColor(ACCENT);
-	        backLbl.setLocation(40 + (220 - backLbl.getWidth()) / 2.0, H - 88 + (48 / 2.0) + 6);
-	        addContent(backLbl);
+        GRect back = new GRect(backX, backY, backW, backH);
+        back.setFilled(true); back.setFillColor(PANEL_BG); back.setColor(ACCENT);
+        addContent(back);
 
-	        backRegion = new Rectangle(40, H - 88, 220, 48);
-	    }
-	 @Override
-	 public void mouseClicked(MouseEvent e) {
-		 int mx = e.getX(), my = e.getY();
-		 if (continueRegion != null && continueRegion.contains(mx, my)) {
-			 //proceed to difficulty / start flow
-			 mainScreen.switchToDifficultyScreen();
-			 return;
-		 }
-		 if (backRegion != null && backRegion.contains(mx, my)) {
-			 mainScreen.switchToWelcomeScreen();
-			 return;
-		 }
-	 }
+        GLabel backLbl = new GLabel("< BACK TO MENU", 0, 0);
+        backLbl.setFont(MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, 18f));
+        backLbl.setColor(ACCENT);
+        backLbl.setLocation(backX + (backW - backLbl.getWidth()) / 2.0, backY + (backH / 2.0) + 6);
+        addContent(backLbl);
+
+        backRegion = new Rectangle(backX, backY, backW, backH);
+    }
+
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        int mx = e.getX(), my = e.getY();
+        if (continueRegion != null && continueRegion.contains(mx, my)) {
+            mainScreen.switchToDifficultyScreen();
+            return;
+        }
+        if (backRegion != null && backRegion.contains(mx, my)) {
+            mainScreen.switchToWelcomeScreen();
+            return;
+        }
+    }
 }
