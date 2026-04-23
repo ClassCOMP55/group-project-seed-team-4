@@ -2,6 +2,9 @@ import java.awt.*;
 import java.awt.event.*;
 import acm.graphics.*;
 import javax.swing.*;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+
 
 public class DescriptionPane extends GraphicsPane{
 
@@ -81,12 +84,30 @@ public class DescriptionPane extends GraphicsPane{
             PacketType p = list[i];
             int y = startY + i * rowH;
 
+            String file = filenameForPacket(p);
+            java.net.URL url = getClass().getResource("/images/" + file);
+
             GObject img;
-            try {
-                GImage g = new GImage("images/" + p.getNormalSprite(), startX, y);
-                g.setSize(imgSize, imgSize);
-                img = g;
-            } catch (Exception e) {
+            if (url != null) {
+                try {
+                    BufferedImage bi = ImageIO.read(url);
+                    if (bi != null) {
+                        GImage g = new GImage(bi, startX, y);
+                        g.setSize(imgSize, imgSize);
+                        img = g;
+                    } else {
+                        throw new Exception("ImageIO returned null for " + file);
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Failed to load image: /images/" + file + " -> " + ex.getMessage());
+                    GRect r = new GRect(startX, y, imgSize, imgSize);
+                    r.setFilled(true);
+                    r.setFillColor(Color.DARK_GRAY);
+                    r.setColor(Color.WHITE);
+                    img = r;
+                }
+            } else {
+                System.err.println("Image resource not found on classpath: /images/" + file);
                 GRect r = new GRect(startX, y, imgSize, imgSize);
                 r.setFilled(true);
                 r.setFillColor(Color.DARK_GRAY);
@@ -105,6 +126,19 @@ public class DescriptionPane extends GraphicsPane{
             descLbl.setFont(fNote);
             descLbl.setColor(TEXT_COL);
             addContent(descLbl);
+        }
+    }
+
+    private String filenameForPacket(PacketType p) {
+        switch (p) {
+            case GOOD: return "GoodPacket.png";
+            case PHISHING: return "PhishingPacket.png";
+            case RANSOMWARE: return "RansomwarePacket.png";
+            case TROJAN: return "TrojanPacket.png";
+            case VIRUS: return "VirusPacket.png";
+            case DATA_BURST: return "DataBurst.png";
+            case DDOS: return "DDoSPacket.png";
+            default: return "GoodPacket.png";
         }
     }
 
