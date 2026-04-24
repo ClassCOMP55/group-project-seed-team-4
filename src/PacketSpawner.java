@@ -148,25 +148,31 @@ public class PacketSpawner {
                 case VIRUS:
                     gamePane.loseLife();
                     gamePane.showFloatingText("VIRUS BREACH  -1 LIFE", new Color(255, 50, 50), px, py - 80);
+                    gamePane.playSfx("KillWrong.wav");
                     break;
                 case TROJAN:
                     gamePane.loseLife();
                     gamePane.showFloatingText("TROJAN BREACH  -1 LIFE", new Color(255, 50, 50), px, py - 80);
+                    gamePane.playSfx("KillWrong.wav");
                     break;
                 case PHISHING:
                     gamePane.loseLife();
                     gamePane.showFloatingText("PHISHING BREACH  -1 LIFE", new Color(255, 50, 50), px, py - 80);
+                    gamePane.playSfx("KillWrong.wav");
                     break;
                 case DDOS:
                     gamePane.triggerDDoS();
+                    gamePane.playSfx("KillWrong.wav");
                     break;
                 case RANSOMWARE:
                     gamePane.deductPoints(type.getRansomPenalty());
                     gamePane.showFloatingText("RANSOMWARE  -$" + type.getRansomPenalty(), new Color(255, 50, 50), px, py - 80);
+                    gamePane.playSfx("KillWrong.wav");
                     break;
                 default:
                     gamePane.loseLife();
                     gamePane.showFloatingText("BREACH  -1 LIFE", new Color(255, 50, 50), px, py - 80);
+                    gamePane.playSfx("KillWrong.wav");
                     break;
             }
 
@@ -218,6 +224,7 @@ public class PacketSpawner {
                 gamePane.loseLife();
                 gamePane.onFriendlyDestroyed();
                 gamePane.showFloatingTextSmall("False Positive  -1 LIFE", new Color(255, 50, 50), x + PACKET_SIZE / 2.0, y - 60);
+                gamePane.playSfx("KillWrong.wav");
             } else {
                 gamePane.updateScore(type.getPoints());
                 gamePane.showFloatingTextSmall("Threat Neutralized  +$" + type.getPoints(), new Color(57, 255, 100), x + PACKET_SIZE / 2.0, y - 60);
