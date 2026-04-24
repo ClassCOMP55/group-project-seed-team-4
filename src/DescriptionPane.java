@@ -62,7 +62,7 @@ public class DescriptionPane extends GraphicsPane {
         int W = (int) mainScreen.getWidth();
         int H = (int) mainScreen.getHeight();
 
-        int CARD_W   = (int)(W * 0.35);
+        int CARD_W   = (int)(W * 0.50);
         int CARD_H   = 99;
         int CARD_GAP = 14;
         int CARD_X   = (W - CARD_W) / 2;
