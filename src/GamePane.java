@@ -415,6 +415,47 @@ public class GamePane extends GraphicsPane {
 
     public void playSfx(String filename) { mainScreen.playSfx(filename); }
 
+    public void showFloatingText(String text, Color color, double x, double y) {
+        showFloatingText(text, color, x, y, 28f);
+    }
+
+    public void showFloatingTextSmall(String text, Color color, double x, double y) {
+        showFloatingText(text, color, x, y, 20f);
+    }
+
+    private void showFloatingText(String text, Color color, double x, double y, float fontSize) {
+        Font fFloat = MainApplication.FONT_ITHACA.deriveFont(Font.BOLD, fontSize);
+        GLabel lbl = new GLabel(text, x, y);
+        lbl.setFont(fFloat);
+        lbl.setColor(color);
+        lbl.setLocation(x - lbl.getWidth() / 2.0, y);
+        mainScreen.add(lbl);
+
+        int[] tick = {0};
+        int totalTicks = 40;
+        Timer anim = new Timer(16, null);
+        anim.addActionListener(e -> {
+            tick[0]++;
+            double progress = (double) tick[0] / totalTicks;
+
+            if (progress >= 1.0) {
+                anim.stop();
+                mainScreen.remove(lbl);
+                return;
+            }
+
+            lbl.move(0, -2.2);
+            mainScreen.remove(lbl);
+            mainScreen.add(lbl);
+
+            int alpha = progress < 0.4
+                ? 255
+                : (int)(255 * (1.0 - (progress - 0.4) / 0.6));
+            lbl.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha));
+        });
+        anim.start();
+    }
+
     public void onEnemyDestroyed() {
         if (peculiarActive && spawner != null) spawner.destroyRandomEnemy();
         onPacketDestroyed();

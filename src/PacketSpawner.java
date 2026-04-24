@@ -133,26 +133,40 @@ public class PacketSpawner {
     }
 
     private void onReachedBottom(GObject obj, PacketType type) {
+        double px = obj.getX() + PACKET_SIZE / 2.0;
+        double py = obj.getY();
         removePacket(obj);
 
         if (!type.isBad()) {
             gamePane.updateScore(type.getPoints());
             gamePane.onFriendlyPassedThrough();
+            String label = (type == PacketType.GOOD ? "Good Packet Installed" : "Data Burst Installed")
+                + "  +$" + type.getPoints();
+            gamePane.showFloatingText(label, new Color(57, 255, 100), px, py - 80);
         } else {
             switch (type) {
                 case VIRUS:
+                    gamePane.loseLife();
+                    gamePane.showFloatingText("VIRUS BREACH  -1 LIFE", new Color(255, 50, 50), px, py - 80);
+                    break;
                 case TROJAN:
+                    gamePane.loseLife();
+                    gamePane.showFloatingText("TROJAN BREACH  -1 LIFE", new Color(255, 50, 50), px, py - 80);
+                    break;
                 case PHISHING:
                     gamePane.loseLife();
+                    gamePane.showFloatingText("PHISHING BREACH  -1 LIFE", new Color(255, 50, 50), px, py - 80);
                     break;
                 case DDOS:
                     gamePane.triggerDDoS();
                     break;
                 case RANSOMWARE:
                     gamePane.deductPoints(type.getRansomPenalty());
+                    gamePane.showFloatingText("RANSOMWARE  -$" + type.getRansomPenalty(), new Color(255, 50, 50), px, py - 80);
                     break;
                 default:
                     gamePane.loseLife();
+                    gamePane.showFloatingText("BREACH  -1 LIFE", new Color(255, 50, 50), px, py - 80);
                     break;
             }
 
@@ -203,10 +217,11 @@ public class PacketSpawner {
             if (!type.isBad()) {
                 gamePane.loseLife();
                 gamePane.onFriendlyDestroyed();
+                gamePane.showFloatingTextSmall("False Positive  -1 LIFE", new Color(255, 50, 50), x + PACKET_SIZE / 2.0, y - 60);
             } else {
                 gamePane.updateScore(type.getPoints());
-             // Notify gamePane that the player destroyed an enemy (for Peculiar Audience)
-                try { gamePane.onEnemyDestroyed(); } catch (Throwable t) { /* ignore if absent */ }
+                gamePane.showFloatingTextSmall("Threat Neutralized  +$" + type.getPoints(), new Color(57, 255, 100), x + PACKET_SIZE / 2.0, y - 60);
+                try { gamePane.onEnemyDestroyed(); } catch (Throwable t) {}
             }
 
             showDestroyed(type.getDestroyedSprite(), x, y, type);
