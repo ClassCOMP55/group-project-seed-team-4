@@ -143,6 +143,7 @@ public class PacketSpawner {
             String label = (type == PacketType.GOOD ? "Good Packet Installed" : "Data Burst Installed")
                 + "  +$" + type.getPoints();
             gamePane.showFloatingText(label, new Color(57, 255, 100), px, py - 80);
+            gamePane.playSfx("PacketCorrect.wav");
         } else {
             switch (type) {
                 case VIRUS:
