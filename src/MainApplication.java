@@ -106,6 +106,7 @@ public class MainApplication extends GraphicsProgram {
  
 		switchToScreen(welcomePane);
 		playMenuMusic();
+		if (soundPlayer != null) soundPlayer.playSfx("BootUp2.wav");
 	}
 	
 	public void switchToWelcomeScreen()     { switchToScreen(welcomePane); playMenuMusic(); }
@@ -118,6 +119,7 @@ public class MainApplication extends GraphicsProgram {
 		gamePane.startNewGame();
 		switchToScreen(gamePane);
 		playGameMusic();
+		if (soundPlayer != null) soundPlayer.playSfx("StartGame2.wav");
 	}
 	
 	public void grantNetworkResetPurchase()  { networkResetCharges++;  }

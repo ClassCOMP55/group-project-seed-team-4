@@ -23,7 +23,7 @@ public class DifficultyPane extends GraphicsPane {
 	private Font fBack;
 	private Font fTicker;
  
-	private static final String[] NAMES  = { "NOOB",    "PRO",    "HACKER"  };
+	private static final String[] NAMES  = { "EASY",    "MEDIUM",    "HARD"  };
 	private static final String[] DESCS  = {
 		"BASIC THREATS  |  3 LIVES  |  SLOW PACKETS",
 		"MIXED THREATS  |  3 LIVES  |  FAST PACKETS",
