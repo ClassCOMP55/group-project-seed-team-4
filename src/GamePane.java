@@ -445,8 +445,8 @@ public class GamePane extends GraphicsPane {
             }
 
             lbl.move(0, -2.2);
-            mainScreen.remove(lbl);
-            mainScreen.add(lbl);
+            //mainScreen.remove(lbl);
+            //mainScreen.add(lbl);
 
             int alpha = progress < 0.4
                 ? 255
