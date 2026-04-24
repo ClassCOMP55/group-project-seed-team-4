@@ -33,8 +33,13 @@ public class MainApplication extends GraphicsProgram {
 	private int virusScannerCharges = 0;
 	private int systemPurgeCharges = 0;
 	
-	private static final String MUSIC_MENU = "menu_music.wav";
-	private static final String MUSIC_GAME = "game_music.wav";
+	private static final String   MUSIC_MENU  = "menu_music.wav";
+	private static final String[] MUSIC_GAME = {
+	    "game_music1.wav",
+	    "game_music2.wav",
+	    "game_music3.wav",
+	    "game_music4.wav"
+	};
 	
 	public void setDifficulty(String difficulty) {
 	    selectedDifficulty = difficulty;
@@ -183,9 +188,7 @@ public class MainApplication extends GraphicsProgram {
 
     private void playGameMusic() {
         if (!musicOn) return;
-        if (soundPlayer != null && !soundPlayer.isPlayingTrack(MUSIC_GAME)) {
-            soundPlayer.playSound(MUSIC_GAME);
-        }
+        if (soundPlayer != null) soundPlayer.playRandom(MUSIC_GAME);
     }
 
     private void stopMusic() {
