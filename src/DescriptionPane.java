@@ -35,15 +35,15 @@ public class DescriptionPane extends GraphicsPane {
         { "TROJAN",        "TrojanPacket.png",     "DESTROY",
           "Faster than a Virus. Click to destroy for $25, or lose 1 life on breach." },
         { "DDoS",          "DDoSPacket.png",       "DESTROY",
-          "DDoS attack. If it enters the system, you will be unable to do anything for 3 seconds. Destroy for $30." },
+          "If it enters the system, you will be unable to do anything for 3 seconds. Destroy for $30." },
         { "PHISHING",      "PhishingPacket.png",   "DESTROY",
-          "Disguises itself as a friendly packet, and briefly reveals its true form. Stay alert. Worth $20 when neutralized." },
+          "Disguises itself as a friendly packet, briefly revealing its true form. Stay alert. Worth $20 when destroyed." },
         { "RANSOMWARE",    "RansomwarePacket.png", "DESTROY",
           "Upon breaching the system, it deducts $200 from your score instead of a life. Destroy it early to prevent the penalty." },
     };
 
     private static final Color[] ENTRY_COLORS = {
-        NEON_CYAN, NEON_YELL, NEON_RED, NEON_RED, NEON_RED, NEON_PURP, NEON_PURP,
+        NEON_CYAN,  NEON_YELL, NEON_RED, NEON_RED, NEON_RED, NEON_PURP, NEON_PURP,
     };
 
     public DescriptionPane(MainApplication mainScreen) {
@@ -62,8 +62,8 @@ public class DescriptionPane extends GraphicsPane {
         int W = (int) mainScreen.getWidth();
         int H = (int) mainScreen.getHeight();
 
-        int CARD_W   = (int)(W * 0.50);
-        int CARD_H   = 99;
+        int CARD_W   = (int)(W * 0.70);
+        int CARD_H   = 72;
         int CARD_GAP = 14;
         int CARD_X   = (W - CARD_W) / 2;
         int N        = ENTRIES.length;
